@@ -1,0 +1,13 @@
+{
+  "name": "@cineconnect/serveur",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Server dev script - to be implemented'",
+    "build": "echo 'Server build script - to be implemented'",
+    "start": "echo 'Server start script - to be implemented'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
