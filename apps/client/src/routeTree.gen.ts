@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FilmsCategorieRouteImport } from './routes/films.$categorie'
+import { Route as FilmIdRouteImport } from './routes/film.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FilmsCategorieRoute = FilmsCategorieRouteImport.update({
+  id: '/films/$categorie',
+  path: '/films/$categorie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmIdRoute = FilmIdRouteImport.update({
+  id: '/film/$id',
+  path: '/film/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/film/$id': typeof FilmIdRoute
+  '/films/$categorie': typeof FilmsCategorieRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/film/$id': typeof FilmIdRoute
+  '/films/$categorie': typeof FilmsCategorieRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/film/$id': typeof FilmIdRoute
+  '/films/$categorie': typeof FilmsCategorieRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/film/$id' | '/films/$categorie'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/film/$id' | '/films/$categorie'
+  id: '__root__' | '/' | '/film/$id' | '/films/$categorie'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FilmIdRoute: typeof FilmIdRoute
+  FilmsCategorieRoute: typeof FilmsCategorieRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/films/$categorie': {
+      id: '/films/$categorie'
+      path: '/films/$categorie'
+      fullPath: '/films/$categorie'
+      preLoaderRoute: typeof FilmsCategorieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/film/$id': {
+      id: '/film/$id'
+      path: '/film/$id'
+      fullPath: '/film/$id'
+      preLoaderRoute: typeof FilmIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FilmIdRoute: FilmIdRoute,
+  FilmsCategorieRoute: FilmsCategorieRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
