@@ -4,7 +4,7 @@
 import { Link } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { cleanPosterUrl } from '../lib/imageUtils';
-import { Film } from '../lib/api';
+import type { Film } from '../lib/api';
 import { StarIcon } from './icons';
 
 interface CollectionFilmCardProps {

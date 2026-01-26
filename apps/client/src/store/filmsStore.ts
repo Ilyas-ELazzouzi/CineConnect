@@ -69,7 +69,7 @@ export const useFilmsStore = create<FilmsState>((set) => ({
     fetchCategories: async () => {
         try {
             const data = await categoriesAPI.getAll();
-            set({ categories: data.categories });
+            set({ categories: data.categories });Promise<void>;
         } catch (error: any) {
             set({ error: error.message || 'Erreur lors du chargement des catégories' });
         }

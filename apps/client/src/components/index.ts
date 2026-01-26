@@ -1,4 +1,11 @@
-export { Header } from './header';
+// Export all components from a single entry point
+export { Header } from './Header';
 export { Hero } from './Hero';
+export { FilmCard } from './FilmCard';
+export { TrendingFilmCard } from './TrendingFilmCard';
+export { TrendingSection } from './TrendingSection';
+export { CollectionFilmCard } from './CollectionFilmCard';
+export { Button } from './Button';
 export { ButtonLink } from './ButtonLink';
-
+export { Loading } from './Loading';
+export * from './icons';

@@ -8,7 +8,7 @@
  */
 export function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url) return false;
-
+  
   // Vérifier que c'est une URL HTTP ou HTTPS valide
   try {
     const urlObj = new URL(url);
@@ -28,11 +28,11 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
 export function cleanPosterUrl(url: string | null | undefined): string | null {
   // Si pas d'URL ou valeur "N/A" d'OMDb, retourner null
   if (!url || url === 'N/A') return null;
-
+  
   // Vérifier si l'URL contient des caractères suspects ou est trop courte
   if (url.includes('undefined') || url.length < 10) {
     return null;
   }
-
+  
   return url;
 }

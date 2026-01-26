@@ -10,8 +10,8 @@ export const Route = createRootRoute({
       <div className="min-h-screen bg-black">
         {/* Header fixe en haut de toutes les pages */}
         <Header />
-        {/* Contenu des routes enfants (pages) - padding-top pour compenser le header fixe */}
-        <main className="pt-16">
+        {/* Contenu des routes enfants (pages) */}
+        <main>
           <Outlet />
         </main>
       </div>

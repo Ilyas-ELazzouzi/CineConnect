@@ -98,7 +98,7 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
               <ButtonLink
                 to="/film/$id"
                 params={{ id: film.id }}
-                variant="default"
+                variant="primary"
                 size="lg"
                 className="transform hover:scale-105"
               >
@@ -117,7 +117,7 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
             {/* Tags de catégories */}
             {film.categories && film.categories.length > 0 && (
               <div className="flex items-center space-x-2 pt-2">
-                {film.categories.slice(0, 3).map((category: string, index: number) => (
+                {film.categories.slice(0, 3).map((category, index) => (
                   <span
                     key={index}
                     className="px-4 py-1.5 bg-white/10 backdrop-blur-sm text-white rounded-full text-sm font-medium border border-white/20 capitalize"

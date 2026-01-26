@@ -54,7 +54,7 @@ export const filmsAPI = {
   // Retourne une liste de films correspondant à la recherche
   search: async (query: string, page: number = 1): Promise<{ films: Film[]; totalResults?: number }> => {
     const result = await omdbService.searchMovies(query, page);
-
+    
     // Si aucune réponse ou erreur, retourner un tableau vide
     if (result.Response === 'False' || !result.Search) {
       return { films: [], totalResults: 0 };
@@ -97,14 +97,14 @@ export const filmsAPI = {
     // Parcourir chaque terme de recherche jusqu'à atteindre la limite
     for (const term of searchTerms) {
       if (allFilms.length >= limit) break;
-
+      
       try {
         const result = await omdbService.searchMovies(term, 1);
         if (result.Search) {
           // Prendre les 5 premiers résultats de chaque recherche
           for (const movie of result.Search.slice(0, 5)) {
             if (seenIds.has(movie.imdbID) || allFilms.length >= limit) continue;
-
+            
             try {
               const details = await omdbService.getMovieById(movie.imdbID);
               const transformed = transformOMDbMovie(details);
@@ -179,7 +179,7 @@ export const filmsAPI = {
   // Utilise la recherche, la catégorie ou les films populaires selon les paramètres
   getAll: async (params?: { search?: string; category?: string; limit?: number }): Promise<{ films: Film[] }> => {
     const limit = params?.limit || 50;
-
+    
     if (params?.search) {
       const result = await filmsAPI.search(params.search, 1);
       return { films: result.films.slice(0, limit) };
