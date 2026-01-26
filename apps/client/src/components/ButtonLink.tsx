@@ -1,10 +1,13 @@
 // Composant ButtonLink : Bouton qui est en fait un lien
 // Même API que Button mais utilise Link de TanStack Router pour la navigation
 
-import { Link, LinkProps } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import React from 'react';
 
-interface ButtonLinkProps extends Omit<LinkProps, 'className'> {
+// Utiliser React.ComponentProps pour obtenir les props du composant Link
+type LinkComponentProps = React.ComponentProps<typeof Link>;
+
+interface ButtonLinkProps extends Omit<LinkComponentProps, 'className'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'; // Style du bouton
   size?: 'sm' | 'md' | 'lg'; // Taille du bouton
   children: React.ReactNode; // Contenu du bouton
