@@ -1,38 +1,38 @@
-// Utilitaires pour la gestion des images
-// Nettoie et optimise les URLs d'images
+// Utilitaires pour gérer les URLs d'images
+// Vérifie la validité des URLs et nettoie celles provenant d'OMDb
 
 /**
- * Nettoie l'URL d'un poster de film
- * Remplace "N/A" par une image par défaut et corrige les URLs
+ * Vérifie si une URL d'image est valide
+ * @param url - URL à vérifier
+ * @returns true si l'URL est valide, false sinon
  */
-export function cleanPosterUrl(url: string | undefined | null): string {
-  if (!url || url === 'N/A' || url.trim() === '') {
-    // Image par défaut (placeholder)
-    return 'https://via.placeholder.com/500x750/1a1a1a/ffffff?text=No+Image';
-  }
-  
-  // S'assurer que l'URL est valide
+export function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+
+  // Vérifier que c'est une URL HTTP ou HTTPS valide
   try {
-    new URL(url);
-    return url;
+    const urlObj = new URL(url);
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
   } catch {
-    // Si l'URL n'est pas valide, retourner l'image par défaut
-    return 'https://via.placeholder.com/500x750/1a1a1a/ffffff?text=No+Image';
+    // Si la création de l'URL échoue, ce n'est pas une URL valide
+    return false;
   }
 }
 
 /**
- * Optimise une URL d'image pour une taille spécifique
+ * Nettoie une URL d'image provenant d'OMDb
+ * OMDb peut retourner "N/A" ou des URLs invalides
+ * @param url - URL à nettoyer
+ * @returns URL nettoyée ou null si invalide
  */
-export function optimizeImageUrl(url: string, width?: number, height?: number): string {
-  const cleaned = cleanPosterUrl(url);
-  
-  // Si c'est une image placeholder, retourner tel quel
-  if (cleaned.includes('placeholder')) {
-    return cleaned;
+export function cleanPosterUrl(url: string | null | undefined): string | null {
+  // Si pas d'URL ou valeur "N/A" d'OMDb, retourner null
+  if (!url || url === 'N/A') return null;
+
+  // Vérifier si l'URL contient des caractères suspects ou est trop courte
+  if (url.includes('undefined') || url.length < 10) {
+    return null;
   }
-  
-  // Pour les vraies images, on pourrait utiliser un service de redimensionnement
-  // Pour l'instant, on retourne l'URL telle quelle
-  return cleaned;
+
+  return url;
 }
