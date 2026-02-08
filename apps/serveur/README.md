@@ -1,17 +1,8 @@
-# Serveur CineConnect
+Backend de l'application 
 
-Backend de l'application CineConnect.
+voilà comment démarrer : 
 
-## 🚀 Démarrage
+pnpm dev:server pour executer uniquement le back
 
-```bash
-# Depuis la racine du monorepo
-pnpm dev:server
+pnpm dev pour executer le front/back 
 
-# Ou depuis ce dossier
-pnpm dev
-```
-
-## 📝 À implémenter
-
-Le serveur est prêt à être configuré avec votre stack backend préférée (Express, Fastify, NestJS, etc.).
