@@ -1,11 +1,8 @@
-// Service pour interagir avec l'API OMDb (Open Movie Database)
-// OMDb fournit des informations sur les films via leur API REST
+// Service pour interagir avec l'API OMDb via le proxy du serveur
+// La clé API reste côté serveur, le client appelle /api/omdb/*
 
-import axios from 'axios';
-
-// Clé API OMDb nécessaire pour authentifier les requêtes
-const OMDB_API_KEY = 'a5bea7e8';
-const OMDB_BASE_URL = 'http://www.omdbapi.com/';
+const getApiBase = () =>
+  import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
 
 // Interface pour les données d'un film retournées par OMDb
 // Correspond exactement au format JSON de l'API
@@ -109,68 +106,28 @@ export function mapGenresToCategories(genreString?: string): string[] {
   return categories;
 }
 
-// Service principal pour appeler l'API OMDb
+// Service principal : appelle le proxy du serveur /api/omdb/*
 export const omdbService = {
-  // Rechercher des films par titre ou mot-clé
-  // Retourne une liste de résultats avec les infos basiques
   searchMovies: async (query: string, page: number = 1): Promise<OMDbSearchResult> => {
-    try {
-      const response = await axios.get<OMDbSearchResult>(OMDB_BASE_URL, {
-        params: {
-          apikey: OMDB_API_KEY,
-          s: query, // Paramètre de recherche
-          type: 'movie', // Seulement les films, pas les séries
-          page: page, // Numéro de page pour la pagination
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Erreur lors de la recherche OMDb:', error);
-      throw error;
-    }
+    const base = getApiBase();
+    const url = `${base}/api/omdb/search?s=${encodeURIComponent(query)}&page=${page}`;
+    const res = await fetch(url);
+    const data = (await res.json()) as OMDbSearchResult & { error?: string };
+    if (!res.ok) throw new Error(data.error ?? 'Erreur OMDb');
+    return data;
   },
 
-  // Récupérer les détails complets d'un film par son ID IMDb
-  // Nécessaire car la recherche ne retourne que les infos basiques
   getMovieById: async (imdbId: string): Promise<OMDbMovie> => {
-    try {
-      const response = await axios.get<OMDbMovie>(OMDB_BASE_URL, {
-        params: {
-          apikey: OMDB_API_KEY,
-          i: imdbId, // Paramètre pour récupérer par ID
-          plot: 'full', // Récupérer le synopsis complet
-        },
-      });
-      
-      // Vérifier si la réponse est valide
-      if (response.data.Response === 'False') {
-        throw new Error(response.data.Error || 'Film non trouvé');
-      }
-      
-      return response.data;
-    } catch (error) {
-      console.error('Erreur lors de la récupération du film OMDb:', error);
-      throw error;
-    }
+    const base = getApiBase();
+    const res = await fetch(`${base}/api/omdb/movie/${encodeURIComponent(imdbId)}`);
+    const data = (await res.json()) as OMDbMovie & { error?: string };
+    if (!res.ok) throw new Error(data.error ?? 'Film non trouvé');
+    if (data.Response === 'False') throw new Error((data as { Error?: string }).Error ?? 'Film non trouvé');
+    return data;
   },
 
-  // Rechercher des films par genre
-  // Utilise le même endpoint que searchMovies mais avec un terme de genre
   searchByGenre: async (genre: string, page: number = 1): Promise<OMDbSearchResult> => {
-    try {
-      const response = await axios.get<OMDbSearchResult>(OMDB_BASE_URL, {
-        params: {
-          apikey: OMDB_API_KEY,
-          s: genre, // Utiliser le genre comme terme de recherche
-          type: 'movie',
-          page: page,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Erreur lors de la recherche par genre OMDb:', error);
-      throw error;
-    }
+    return omdbService.searchMovies(genre, page);
   },
 };
 
