@@ -1,5 +1,5 @@
 import { pgTable, timestamp, uuid, text, unique } from 'drizzle-orm/pg-core';
-import { users } from './users.js';
+import { users } from './users';
 
 /** Valeurs autorisées pour status - à valider côté application */
 export const FRIEND_STATUSES = ['pending', 'accepted', 'rejected'] as const;

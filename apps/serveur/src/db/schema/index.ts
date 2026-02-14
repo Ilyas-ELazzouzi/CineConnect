@@ -1,6 +1,6 @@
-export { users } from './users.js';
-export { films } from './films.js';
-export { categories } from './categories.js';
-export { reviews } from './reviews.js';
-export { messages } from './messages.js';
-export { friends } from './friends.js';
+export { users } from './users';
+export { films } from './films';
+export { categories } from './categories';
+export { reviews } from './reviews';
+export { messages } from './messages';
+export { friends } from './friends';
