@@ -1,8 +1,10 @@
 // Store Zustand pour gérer l'état d'authentification
-// Phase 1 : Les fonctions login/register ne sont pas fonctionnelles
-// Phase 2 : Sera connecté au backend avec JWT
+// Connecté à l'API du serveur (login, register)
 
 import { create } from 'zustand';
+
+const getApiBase = () =>
+  import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
 
 // Interface pour représenter un utilisateur
 interface User {
@@ -38,16 +40,34 @@ export const useAuthStore = create<AuthState>((set) => {
         token: storedToken,
         isAuthenticated: !!storedToken,
 
-        // Connecte un utilisateur avec email et mot de passe
-        // Phase 1 : Lance une erreur (non implémenté)
-        login: async (_email: string, _password: string) => {
-            throw new Error('L\'authentification sera disponible en Phase 2 (après l\'intégration du backend)');
+        // Connecte un utilisateur avec email et mot de passe (appelle l'API du serveur)
+        login: async (email: string, password: string) => {
+            const res = await fetch(`${getApiBase()}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error ?? 'Échec de connexion');
+            const user = { id: data.user.id, username: data.user.username, email: data.user.email };
+            set({ user, token: data.token, isAuthenticated: true });
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(user));
         },
 
-        // Inscrit un nouvel utilisateur
-        // Phase 1 : Lance une erreur (non implémenté)
-        register: async (_username: string, _email: string, _password: string) => {
-            throw new Error('L\'inscription sera disponible en Phase 2 (après l\'intégration du backend)');
+        // Inscrit un nouvel utilisateur (appelle l'API du serveur)
+        register: async (username: string, email: string, password: string) => {
+            const res = await fetch(`${getApiBase()}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error ?? 'Échec d\'inscription');
+            const user = { id: data.user.id, username: data.user.username, email: data.user.email };
+            set({ user, token: data.token, isAuthenticated: true });
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(user));
         },
 
         // Déconnecte l'utilisateur actuel
