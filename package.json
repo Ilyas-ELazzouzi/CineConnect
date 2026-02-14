@@ -10,6 +10,7 @@
         "build": "pnpm --filter @cineconnect/client build",
         "build:client": "pnpm --filter @cineconnect/client build",
         "build:server": "pnpm --filter @cineconnect/serveur build",
+        "start": "pnpm build:client && pnpm dev:server",
         "lint": "pnpm --filter @cineconnect/client lint",
         "clean": "pnpm -r exec rm -rf node_modules dist .next",
         "install:all": "pnpm install"
