@@ -1,4 +1,7 @@
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import type { Env } from './config/env.js';
@@ -9,6 +12,9 @@ import { registerOmdbRoutes } from './routes/omdb.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { buildOpenApiSpec } from './openapi/spec.js';
 import { errorHandler } from './middlewares/error.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
 
 export function createApp(opts: { env: Env; db?: Db }) {
   const { env, db } = opts;
@@ -45,6 +51,13 @@ export function createApp(opts: { env: Env; db?: Db }) {
   const spec = buildOpenApiSpec(env);
   app.get('/openapi.json', (_req, res) => res.json(spec));
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
+
+  if (fs.existsSync(clientDistPath)) {
+    app.use(express.static(clientDistPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(clientDistPath, 'index.html'));
+    });
+  }
 
   app.use(errorHandler);
   return app;
