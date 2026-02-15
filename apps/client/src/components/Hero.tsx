@@ -2,11 +2,11 @@
 // Affiche un film en vedette avec image de fond en plein écran
 // Style inspiré de Netflix avec overlay et informations du film
 
-import { StarIcon, CalendarIcon } from './icons';
-import type { Film } from '../lib/api';
-import { cleanPosterUrl } from '../lib/imageUtils';
-import { useState, useEffect } from 'react';
-import { ButtonLink } from './ButtonLink';
+import { StarIcon, CalendarIcon } from "./icons";
+import type { Film } from "../lib/api";
+import { cleanPosterUrl } from "../lib/imageUtils";
+import { useState, useEffect } from "react";
+import { ButtonLink } from "./ButtonLink";
 
 interface HeroProps {
   film: Film | null; // Film à afficher en vedette
@@ -72,7 +72,9 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
               {film.rating && (
                 <div className="flex items-center space-x-2">
                   <StarIcon className="w-6 h-6 text-yellow-400" />
-                  <span className="text-xl font-semibold">{Number(film.rating).toFixed(1)}</span>
+                  <span className="text-xl font-semibold">
+                    {Number(film.rating).toFixed(1)}
+                  </span>
                 </div>
               )}
               {film.year && (
@@ -96,20 +98,14 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
             {/* Boutons d'action */}
             <div className="flex items-center space-x-4 pt-4">
               <ButtonLink
-                to="/film/$id"
-                params={{ id: film.id }}
+                to={`/film/${film.id}`}
                 variant="primary"
                 size="lg"
                 className="transform hover:scale-105"
               >
                 Notez !
               </ButtonLink>
-              <ButtonLink
-                to="/film/$id"
-                params={{ id: film.id }}
-                variant="secondary"
-                size="lg"
-              >
+              <ButtonLink to={`/film/${film.id}`} variant="secondary" size="lg">
                 Plus d'infos
               </ButtonLink>
             </div>
