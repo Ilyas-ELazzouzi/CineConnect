@@ -2,7 +2,7 @@
 // Phase 1 : Frontend uniquement, sans backend
 // Toutes les données proviennent directement de l'API OMDb
 
-import { omdbService, transformOMDbMovie, mapGenresToCategories } from './omdb';
+import { omdbService, transformOMDbMovie } from './omdb';
 
 // Interface pour représenter un film dans l'application
 // Les données sont transformées depuis le format OMDb vers ce format standardisé

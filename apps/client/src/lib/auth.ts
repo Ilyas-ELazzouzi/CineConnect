@@ -6,7 +6,7 @@
  * Tente de connecter un utilisateur
  * Phase 1 : Non implémenté, lance une erreur
  */
-export const login = async (email: string, password: string) => {
+export const login = async (_email: string, _password: string) => {
   throw new Error('L\'authentification sera disponible en Phase 2 (après l\'intégration du backend)');
 };
 
@@ -14,7 +14,7 @@ export const login = async (email: string, password: string) => {
  * Inscrit un nouvel utilisateur
  * Phase 1 : Non implémenté, lance une erreur
  */
-export const register = async (username: string, email: string, password: string) => {
+export const register = async (_username: string, _email: string, _password: string) => {
   throw new Error('L\'inscription sera disponible en Phase 2 (après l\'intégration du backend)');
 };
 
