@@ -1,16 +1,15 @@
 // Vue FilmsView : Page de collection de tous les films
 // Permet de rechercher, filtrer et parcourir tous les films disponibles
 
-import { useState, useEffect, useCallback } from 'react';
-import { CollectionFilmCard, Loading } from '../components';
-import { SearchIcon, FilterIcon } from '../components/icons';
-import { useFilmsStore } from '../store';
+import { useState, useEffect, useCallback } from "react";
+import { CollectionFilmCard, Loading } from "../components";
+import { SearchIcon, FilterIcon } from "../components/icons";
+import { useFilmsStore } from "../store";
 
 export const FilmsView = () => {
   // Récupération des données et actions depuis le store films
   const {
     films,
-    categories,
     searchQuery,
     selectedCategory,
     isLoading,
@@ -63,43 +62,47 @@ export const FilmsView = () => {
   }, [searchQuery, selectedCategory]);
 
   // Toggle un genre dans la liste des genres sélectionnés
-  const toggleGenre = useCallback((genre: string) => {
-    setSelectedGenres((prev) => {
-      if (prev.includes(genre)) {
-        // Retirer le genre s'il est déjà sélectionné
-        return prev.filter((g) => g !== genre);
-      }
-      // Ajouter le genre s'il n'est pas sélectionné
-      return [...prev, genre];
-    });
-    // Réinitialiser la catégorie sélectionnée quand on utilise les filtres de genre
-    setSelectedCategory('');
-  }, [setSelectedCategory]);
+  const toggleGenre = useCallback(
+    (genre: string) => {
+      setSelectedGenres((prev) => {
+        if (prev.includes(genre)) {
+          // Retirer le genre s'il est déjà sélectionné
+          return prev.filter((g) => g !== genre);
+        }
+        // Ajouter le genre s'il n'est pas sélectionné
+        return [...prev, genre];
+      });
+      // Réinitialiser la catégorie sélectionnée quand on utilise les filtres de genre
+      setSelectedCategory("");
+    },
+    [setSelectedCategory]
+  );
 
   // Filtrer les films selon les genres sélectionnés
   // Si aucun genre n'est sélectionné, afficher tous les films
-  const filteredFilms = selectedGenres.length > 0
-    ? films.filter((film) =>
-        film.categories?.some((cat) =>
-          selectedGenres.some((genre) =>
-            cat.toLowerCase().includes(genre.toLowerCase())
+  const filteredFilms =
+    selectedGenres.length > 0
+      ? films.filter((film) =>
+          film.categories?.some((cat) =>
+            selectedGenres.some((genre) =>
+              cat.toLowerCase().includes(genre.toLowerCase())
+            )
           )
         )
-      )
-    : films;
+      : films;
 
   // Liste des genres populaires pour les badges de filtrage
   const popularGenres = [
-    'Action',
-    'Thriller',
-    'Horror',
-    'Sci-Fi',
-    'Fantasy',
-    'Romance',
-    'Anime',
-    'Comedy',
-    'Drama',
-    'Adventure',
+    "Action",
+    "Thriller",
+    "Horror",
+    "Sci-Fi",
+    "Fantasy",
+    "Romance",
+    "Anime",
+    "Comedy",
+    "Drama",
+    "Adventure",
   ];
 
   return (
@@ -148,8 +151,8 @@ export const FilmsView = () => {
                   px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                   ${
                     isSelected
-                      ? 'bg-[#9747FF] text-white'
-                      : 'bg-gray-900 text-gray-300 hover:bg-gray-800 border border-gray-800'
+                      ? "bg-[#9747FF] text-white"
+                      : "bg-gray-900 text-gray-300 hover:bg-gray-800 border border-gray-800"
                   }
                 `}
               >
@@ -166,9 +169,7 @@ export const FilmsView = () => {
           </div>
         ) : filteredFilms.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-lg">
-              Aucun film trouvé
-            </div>
+            <div className="text-gray-400 text-lg">Aucun film trouvé</div>
             <p className="text-gray-500 mt-2">
               Essayez de modifier vos critères de recherche
             </p>

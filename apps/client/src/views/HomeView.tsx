@@ -1,16 +1,14 @@
 // Vue HomeView : Page d'accueil principale
 // Affiche le hero avec un film en vedette et la section "Tendances du moment"
 
-import { useEffect } from 'react';
-import { Hero, TrendingSection } from '../components';
-import { useFilmsStore } from '../store';
+import { useEffect } from "react";
+import { Hero, TrendingSection } from "../components";
+import { useFilmsStore } from "../store";
 
 export const HomeView = () => {
   // Récupération des données et actions depuis le store films
   const {
     heroFilm,
-    films,
-    categories,
     isLoading,
     fetchHeroFilm,
     fetchPopularFilms,
@@ -31,7 +29,7 @@ export const HomeView = () => {
       <Hero film={heroFilm} isLoading={isLoading && !heroFilm} />
 
       {/* Contenu principal avec padding pour compenser le header fixe */}
-      <div className="pt-16 overflow-x-hidden" style={{ overflowY: 'visible' }}>
+      <div className="pt-16 overflow-x-hidden" style={{ overflowY: "visible" }}>
         {/* Section "Tendances du moment" avec grille horizontale scrollable */}
         <TrendingSection />
       </div>
