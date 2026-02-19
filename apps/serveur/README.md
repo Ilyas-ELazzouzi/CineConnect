@@ -11,7 +11,7 @@ Backend de l'application CineConnect (monorepo pnpm).
 - **Swagger UI** (OpenAPI)
 - Tests **Vitest** (+ Supertest)
 
-## 🚀 Démarrage
+# Démarrage
 
 ```bash
 # Depuis la racine du monorepo
@@ -21,7 +21,7 @@ pnpm dev:server
 pnpm dev
 ```
 
-## ⚙️ Configuration
+# Configuration
 
 Copie `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/.env.example` vers `.env` puis renseigne `OMDB_API_KEY`.
 
@@ -34,7 +34,7 @@ Variables d’environnement:
 - `OMDB_API_KEY` (proxy OMDb)
 - `CORS_ORIGINS` (défaut: `http://localhost:5173,http://127.0.0.1:5173`)
 
-## 📦 Scripts
+# Scripts
 
 Définis dans `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/package.json`:
 
@@ -45,7 +45,7 @@ Définis dans `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/
 - `pnpm test` / `pnpm test:watch` : Vitest
 - `pnpm db:generate` / `pnpm db:migrate` / `pnpm db:studio` : Drizzle Kit
 
-## 📡 Endpoints
+# Endpoints
 
 - `GET /health` -> statut du serveur
 - `POST /api/auth/register` -> inscription + JWT
@@ -65,7 +65,7 @@ Auth socket: `socket.handshake.auth.token` (JWT).
 - `room:join` (roomId)
 - `message:send` ({ roomId, content }) -> persist en BDD -> broadcast `message:new`
 
-## 🧩 Architecture (fichiers)
+## Architecture (fichiers)
 
 - Entrée serveur: `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/src/index.ts`
 - App Express: `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/src/app.ts`
@@ -77,7 +77,7 @@ Auth socket: `socket.handshake.auth.token` (JWT).
 - Socket.io: `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/src/socket/index.ts`
 - OpenAPI: `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/serveur/src/openapi/spec.ts`
 
-## 🧪 Notes de test dans ce sandbox
+## Notes de test dans ce sandbox
 
 Dans ce sandbox Codex, l’ouverture d’un port peut échouer (`EPERM`). Pour valider que le serveur “démarre” sans écouter réseau:
 
