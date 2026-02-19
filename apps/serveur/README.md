@@ -56,7 +56,7 @@ Définis dans `/Users/ouchenedihya/Desktop/les projet 2 éme /CineConnect/apps/
 - `GET /openapi.json` -> spec OpenAPI
 - `GET /docs` -> Swagger UI
 
-## 🔌 Socket.io (temps réel)
+# Socket.io (temps réel)
 
 Auth socket: `socket.handshake.auth.token` (JWT).
 
