@@ -10,7 +10,7 @@ import type { Db } from './db/client.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerOmdbRoutes } from './routes/omdb.js';
 import { registerAuthRoutes } from './routes/auth.js';
-import { buildOpenApiSpec } from './openapi/spec.js';
+import { buildOpenApiSpec } from './openapi/apiCart.js';
 import { errorHandler } from './middlewares/error.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

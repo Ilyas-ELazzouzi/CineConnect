@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:socket": "tsx scripts/test-socket.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
@@ -37,6 +38,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "drizzle-kit": "^0.31.4",
     "supertest": "^7.1.1",
+    "socket.io-client": "^4.8.1",
     "tsx": "^4.20.5",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
