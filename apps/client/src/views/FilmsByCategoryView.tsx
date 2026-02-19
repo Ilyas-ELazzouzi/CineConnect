@@ -11,7 +11,6 @@ export const FilmsByCategoryView: React.FC<FilmsByCategoryViewProps> = ({ catego
 
   useEffect(() => {
     fetchFilmsByCategory(category, 50);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
   return (

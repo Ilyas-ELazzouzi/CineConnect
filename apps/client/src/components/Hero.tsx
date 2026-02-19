@@ -1,7 +1,3 @@
-// Composant Hero : Section hero de la page d'accueil
-// Affiche un film en vedette avec image de fond en plein écran
-// Style inspiré de Netflix avec overlay et informations du film
-
 import { StarIcon, CalendarIcon } from "./icons";
 import type { Film } from "../lib/api";
 import { cleanPosterUrl } from "../lib/imageUtils";
@@ -9,15 +5,14 @@ import { useState, useEffect } from "react";
 import { ButtonLink } from "./ButtonLink";
 
 interface HeroProps {
-  film: Film | null; // Film à afficher en vedette
-  isLoading?: boolean; // Indicateur de chargement
+  film: Film | null;
+  isLoading?: boolean;
 }
 
 export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
-  // Nettoyer l'URL du poster et la définir comme image de fond
   useEffect(() => {
     if (film?.poster) {
       const cleaned = cleanPosterUrl(film.poster);
@@ -26,7 +21,6 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
     }
   }, [film]);
 
-  // Afficher un état de chargement si le film n'est pas encore chargé
   if (isLoading || !film) {
     return (
       <div className="relative h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
@@ -37,7 +31,6 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Image de fond avec overlays pour la lisibilité */}
       <div className="absolute inset-0">
         {backgroundImage && !imageError ? (
           <>
@@ -47,27 +40,21 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
-            {/* Overlay gradient de gauche pour améliorer la lisibilité du texte */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
-            {/* Overlay gradient du bas pour le contenu */}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
           </>
         ) : (
-          // Fallback si l'image ne charge pas
           <div className="w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-900" />
         )}
       </div>
 
-      {/* Contenu principal avec informations du film */}
       <div className="relative z-10 h-full flex items-center">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-2xl space-y-6 animate-fade-in">
-            {/* Titre du film en très grand */}
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-display font-black text-white leading-tight">
               {film.title.toUpperCase()}
             </h1>
 
-            {/* Métadonnées : note, année, durée */}
             <div className="flex items-center space-x-6 text-white">
               {film.rating && (
                 <div className="flex items-center space-x-2">
@@ -88,14 +75,12 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
               )}
             </div>
 
-            {/* Description du film */}
             {film.plot && (
               <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl line-clamp-3">
                 {film.plot}
               </p>
             )}
 
-            {/* Boutons d'action */}
             <div className="flex items-center space-x-4 pt-4">
               <ButtonLink
                 to={`/film/${film.id}`}
@@ -110,7 +95,6 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
               </ButtonLink>
             </div>
 
-            {/* Tags de catégories */}
             {film.categories && film.categories.length > 0 && (
               <div className="flex items-center space-x-2 pt-2">
                 {film.categories.slice(0, 3).map((category, index) => (

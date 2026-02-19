@@ -1,7 +1,3 @@
-// Vue LoginView : Page de connexion/inscription combinée
-// Gère à la fois le formulaire de connexion et d'inscription avec transition fluide
-// Phase 1 : Les actions lancent des erreurs (non fonctionnel)
-
 import { useState } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuthStore } from '../store';
@@ -9,18 +5,14 @@ import { useAuthStore } from '../store';
 export const LoginView = () => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  
-  // État pour basculer entre connexion et inscription
+
   const [isLogin, setIsLogin] = useState(true);
-  // États des champs du formulaire
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  // États pour la gestion des erreurs et du chargement
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -28,41 +20,33 @@ export const LoginView = () => {
 
     try {
       if (isLogin) {
-        // Tenter de se connecter
         await login(email, password);
       } else {
-        // Tenter de s'inscrire
         const register = useAuthStore.getState().register;
         await register(username, email, password);
       }
-      // Rediriger vers la page d'accueil en cas de succès
       navigate({ to: '/' });
     } catch (err: any) {
-      // Afficher l'erreur
       setError(err.message || 'L\'authentification sera disponible en Phase 2');
     } finally {
       setLoading(false);
     }
   };
 
-  // Gestion de la connexion Google (non implémentée en Phase 1)
   const handleGoogleLogin = () => {
     setError('La connexion Google sera disponible en Phase 2');
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8"
       style={{
         background: 'linear-gradient(180deg, #0F0A1A 0%, #1C1033 35%, #301D52 80%)',
       }}
     >
       <div className="max-w-md w-full">
-        {/* Formulaire principal */}
         <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl">
-          {/* Boutons pour basculer entre Connexion et Inscription */}
           <div className="flex mb-8 bg-gray-800 rounded-lg p-1 relative">
-            {/* Indicateur animé qui suit le bouton actif */}
             <div
               className={`
                 absolute top-1 bottom-1 bg-[#9747FF] rounded-lg transition-all duration-500 ease-in-out
@@ -104,19 +88,17 @@ export const LoginView = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Affichage des erreurs */}
             {error && (
               <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
 
-            {/* Champ nom d'utilisateur (uniquement visible en mode inscription) */}
             <div
               className={`
                 overflow-hidden transition-all duration-500 ease-in-out
-                ${!isLogin 
-                  ? 'max-h-24 opacity-100' 
+                ${!isLogin
+                  ? 'max-h-24 opacity-100'
                   : 'max-h-0 opacity-0'
                 }
               `}
@@ -137,7 +119,6 @@ export const LoginView = () => {
               </div>
             </div>
 
-            {/* Champ email */}
             <div>
               <label className="block text-gray-300 mb-2 text-sm font-medium">
                 Email
@@ -152,7 +133,6 @@ export const LoginView = () => {
               />
             </div>
 
-            {/* Champ mot de passe */}
             <div>
               <label className="block text-gray-300 mb-2 text-sm font-medium">
                 Mot de passe
@@ -166,7 +146,6 @@ export const LoginView = () => {
                 className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#9747FF] focus:border-transparent transition-all"
                 placeholder="admin@gmail.com"
               />
-              {/* Lien "Mot de passe oublié" uniquement en mode connexion */}
               {isLogin && (
                 <Link
                   to="/login"
@@ -177,7 +156,6 @@ export const LoginView = () => {
               )}
             </div>
 
-            {/* Bouton de soumission */}
             <button
               type="submit"
               disabled={loading}
@@ -187,7 +165,6 @@ export const LoginView = () => {
             </button>
           </form>
 
-          {/* Séparateur "OU" */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-700"></div>
@@ -197,7 +174,6 @@ export const LoginView = () => {
             </div>
           </div>
 
-          {/* Bouton de connexion Google */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -224,7 +200,6 @@ export const LoginView = () => {
             Continuez avec Google
           </button>
 
-          {/* Lien pour basculer entre connexion et inscription */}
           <div className="mt-6 text-center text-sm text-gray-400">
             {isLogin ? (
               <>

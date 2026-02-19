@@ -1,33 +1,27 @@
-// Composant FilmCard : Carte de film réutilisable
-// Supporte deux variantes : default (pour la page d'accueil) et compact (pour les listes)
-
 import { Link } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { cleanPosterUrl } from '../lib/imageUtils';
 import type { Film } from '../lib/api';
 
 interface FilmCardProps {
-  film: Film; // Film à afficher
-  variant?: 'default' | 'compact'; // Variante d'affichage
+  film: Film;
+  variant?: 'default' | 'compact';
 }
 
 export const FilmCard: React.FC<FilmCardProps> = ({ film, variant = 'default' }) => {
   const [imageError, setImageError] = useState(false);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
 
-  // Nettoyer l'URL du poster
   useEffect(() => {
     const cleaned = cleanPosterUrl(film.poster);
     setPosterUrl(cleaned);
   }, [film.poster]);
 
-  // Gérer les erreurs de chargement d'image
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.preventDefault();
     setImageError(true);
   };
 
-  // Variante compacte : design minimaliste pour les listes
   if (variant === 'compact') {
     return (
       <Link
@@ -75,7 +69,6 @@ export const FilmCard: React.FC<FilmCardProps> = ({ film, variant = 'default' })
     );
   }
 
-  // Variante par défaut : design avec effets au survol
   return (
     <Link
       to="/film/$id"
@@ -92,7 +85,6 @@ export const FilmCard: React.FC<FilmCardProps> = ({ film, variant = 'default' })
             loading="lazy"
           />
         ) : (
-          // Placeholder si l'image ne charge pas
           <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
             <div className="text-center p-4">
               <svg className="w-16 h-16 mx-auto text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +94,6 @@ export const FilmCard: React.FC<FilmCardProps> = ({ film, variant = 'default' })
             </div>
           </div>
         )}
-        {/* Overlay gradient qui apparaît au survol */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="p-4">

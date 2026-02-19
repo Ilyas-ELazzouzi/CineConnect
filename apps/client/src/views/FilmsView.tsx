@@ -1,13 +1,9 @@
-// Vue FilmsView : Page de collection de tous les films
-// Permet de rechercher, filtrer et parcourir tous les films disponibles
-
 import { useState, useEffect, useCallback } from "react";
 import { CollectionFilmCard, Loading } from "../components";
 import { SearchIcon, FilterIcon } from "../components/icons";
 import { useFilmsStore } from "../store";
 
 export const FilmsView = () => {
-  // Récupération des données et actions depuis le store films
   const {
     films,
     searchQuery,
@@ -21,65 +17,46 @@ export const FilmsView = () => {
     fetchCategories,
   } = useFilmsStore();
 
-  // État local pour la recherche (avec debounce)
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
-  // Genres sélectionnés pour le filtrage
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  // Affichage des filtres avancés (non utilisé pour l'instant)
   const [showFilters, setShowFilters] = useState(false);
 
-  // Charger les catégories disponibles au montage
   useEffect(() => {
     fetchCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Debounce de la recherche : attendre 500ms après la dernière frappe
-  // Évite de faire trop de requêtes API
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localSearchQuery !== searchQuery) {
         setSearchQuery(localSearchQuery);
       }
     }, 500);
-
     return () => clearTimeout(timer);
   }, [localSearchQuery, searchQuery, setSearchQuery]);
 
-  // Charger les films selon la recherche ou la catégorie sélectionnée
   useEffect(() => {
     if (searchQuery.trim()) {
-      // Si recherche active, lancer la recherche
       searchFilms(searchQuery);
     } else if (selectedCategory) {
-      // Si catégorie sélectionnée, charger les films de cette catégorie
       fetchFilmsByCategory(selectedCategory, 50);
     } else {
-      // Sinon, charger les films populaires
       fetchPopularFilms(50);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedCategory]);
 
-  // Toggle un genre dans la liste des genres sélectionnés
   const toggleGenre = useCallback(
     (genre: string) => {
       setSelectedGenres((prev) => {
         if (prev.includes(genre)) {
-          // Retirer le genre s'il est déjà sélectionné
           return prev.filter((g) => g !== genre);
         }
-        // Ajouter le genre s'il n'est pas sélectionné
         return [...prev, genre];
       });
-      // Réinitialiser la catégorie sélectionnée quand on utilise les filtres de genre
       setSelectedCategory("");
     },
     [setSelectedCategory]
   );
 
-  // Filtrer les films selon les genres sélectionnés
-  // Si aucun genre n'est sélectionné, afficher tous les films
   const filteredFilms =
     selectedGenres.length > 0
       ? films.filter((film) =>
@@ -91,7 +68,6 @@ export const FilmsView = () => {
         )
       : films;
 
-  // Liste des genres populaires pour les badges de filtrage
   const popularGenres = [
     "Action",
     "Thriller",
@@ -108,7 +84,6 @@ export const FilmsView = () => {
   return (
     <div className="min-h-screen bg-black pt-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        {/* En-tête avec titre et sous-titre centrés */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-3">
             EXPLOREZ NOTRE COLLECTION
@@ -118,7 +93,6 @@ export const FilmsView = () => {
           </p>
         </div>
 
-        {/* Barre de recherche avec icône et bouton filtres */}
         <div className="mb-6 flex gap-4">
           <div className="flex-1 relative">
             <input
@@ -139,7 +113,6 @@ export const FilmsView = () => {
           </button>
         </div>
 
-        {/* Badges de filtrage par genre */}
         <div className="mb-8 flex flex-wrap gap-3">
           {popularGenres.map((genre) => {
             const isSelected = selectedGenres.includes(genre);
@@ -162,7 +135,6 @@ export const FilmsView = () => {
           })}
         </div>
 
-        {/* Grille de films responsive */}
         {isLoading ? (
           <div className="text-center py-12">
             <Loading text="Chargement des films..." />

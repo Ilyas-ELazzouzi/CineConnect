@@ -1,4 +1,3 @@
-// Export all views from a single entry point
 export { HomeView } from './HomeView';
 export { FilmsView } from './FilmsView';
 export { FilmsByCategoryView } from './FilmsByCategoryView';

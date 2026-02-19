@@ -1,4 +1,3 @@
-// Export all components from a single entry point
 export { Header } from './Header';
 export { Hero } from './Hero';
 export { FilmCard } from './FilmCard';
