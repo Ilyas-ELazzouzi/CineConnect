@@ -13,7 +13,8 @@
     "test:socket": "tsx tests/test-socket.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed:community": "tsx scripts/seed-community.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
