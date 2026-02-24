@@ -8,6 +8,13 @@
       "when": 1771093860690,
       "tag": "0000_unusual_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771960878339,
+      "tag": "0001_futuristic_mimic",
+      "breakpoints": true
     }
   ]
 }

@@ -4,3 +4,6 @@ export { categories } from './categories';
 export { reviews } from './reviews';
 export { messages } from './messages';
 export { friends } from './friends';
+export { communityPosts } from './communityPosts';
+export { postComments } from './postComments';
+export { postLikes } from './postLikes';
