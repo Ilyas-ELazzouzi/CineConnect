@@ -1,70 +1,75 @@
-import { useState } from "react";
-
-type CommunityPost = {
-  id: string;
-  authorName: string;
-  filmTitle: string;
-  content: string;
-  views: number;
-  comments: number;
-  likes: number;
-};
-
-type TrendingTopic = {
-  id: string;
-  label: string;
-  postsCount: string;
-};
-
-const mockPosts: CommunityPost[] = [
-  {
-    id: "1",
-    authorName: "Nabil LMRABET",
-    filmTitle: "Breaking Bad : Un avis",
-    content: "Une série incroyable, surtout la saison 4 !",
-    views: 1087,
-    comments: 392,
-    likes: 156,
-  },
-  {
-    id: "2",
-    authorName: "Nabil LMRABET",
-    filmTitle: "Breaking Bad : Un avis",
-    content: "Le développement de Walter White est juste parfait.",
-    views: 987,
-    comments: 210,
-    likes: 120,
-  },
-  {
-    id: "3",
-    authorName: "Nabil LMRABET",
-    filmTitle: "Breaking Bad : Un avis",
-    content: "La mise en scène et la tension sont au top.",
-    views: 842,
-    comments: 180,
-    likes: 99,
-  },
-];
-
-const mockTrending: TrendingTopic[] = [
-  { id: "t1", label: "#Breaking Bad", postsCount: "2.4k post" },
-  { id: "t2", label: "#Breaking Bad", postsCount: "2.4k post" },
-  { id: "t3", label: "#Breaking Bad", postsCount: "2.4k post" },
-  { id: "t4", label: "#Breaking Bad", postsCount: "2.4k post" },
-  { id: "t5", label: "#Breaking Bad", postsCount: "2.4k post" },
-];
+import { useEffect, useState } from "react";
+import {
+  type CommunityPost,
+  type TrendingTopic,
+  fetchCommunityPosts,
+  fetchTrendingTopics,
+  createCommunityPost,
+} from "../lib/community";
+import { useAuthStore } from "../store";
 
 export const DiscussionView = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "trending" | "hot">(
     "all"
   );
   const [newPostContent, setNewPostContent] = useState("");
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [topics, setTopics] = useState<TrendingTopic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { token, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [fetchedPosts, fetchedTopics] = await Promise.all([
+          fetchCommunityPosts(50),
+          fetchTrendingTopics(10),
+        ]);
+        setPosts(fetchedPosts);
+        setTopics(fetchedTopics);
+      } catch (e: any) {
+        setError(e.message ?? "Erreur lors du chargement de la communauté");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostContent.trim()) return;
-    // L’intégration backend sera ajoutée dans l’étape suivante.
-    setNewPostContent("");
+    if (!isAuthenticated || !token) {
+      setError("Connectez-vous pour publier un message.");
+      return;
+    }
+
+    (async () => {
+      try {
+        setError(null);
+        const post = await createCommunityPost(
+          { content: newPostContent.trim() },
+          token
+        );
+        setPosts((prev) => [
+          {
+            ...post,
+            author: post.author ?? {
+              id: post.userId,
+              username: "Vous",
+              avatarUrl: null,
+            },
+          },
+          ...prev,
+        ]);
+        setNewPostContent("");
+      } catch (e: any) {
+        setError(e.message ?? "Erreur lors de la création du post");
+      }
+    })();
   };
 
   return (
@@ -111,6 +116,11 @@ export const DiscussionView = () => {
 
           {/* Zone de création de post */}
           <section className="bg-gray-900 rounded-2xl px-6 py-4 flex flex-col gap-4">
+            {error && (
+              <div className="text-xs text-red-400 bg-red-900/40 border border-red-500/60 rounded-lg px-3 py-2 mb-1">
+                {error}
+              </div>
+            )}
             <form onSubmit={handlePublish} className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-gray-700" />
@@ -144,43 +154,51 @@ export const DiscussionView = () => {
 
           {/* Feed des posts */}
           <section className="space-y-4">
-            {mockPosts.map((post) => (
-              <article
-                key={post.id}
-                className="bg-gray-900 rounded-2xl px-6 py-4 flex flex-col gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-700" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-white">
-                      {post.authorName}
-                    </span>
+            {loading ? (
+              <div className="text-gray-400 text-sm">Chargement...</div>
+            ) : posts.length === 0 ? (
+              <div className="text-gray-500 text-sm">
+                Aucun message pour le moment. Soyez le premier à partager un avis !
+              </div>
+            ) : (
+              posts.map((post) => (
+                <article
+                  key={post.id}
+                  className="bg-gray-900 rounded-2xl px-6 py-4 flex flex-col gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-700" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-white">
+                        {post.author?.username ?? "Utilisateur"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-1 space-y-1">
-                  <h2 className="text-base font-semibold text-white">
-                    {post.filmTitle}
-                  </h2>
-                  <p className="text-sm text-gray-300">
-                    {post.content}
-                  </p>
-                </div>
-                <div className="flex items-center gap-6 text-xs text-gray-500 mt-2">
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                    <span>{post.likes}</span>
+                  <div className="mt-1 space-y-1">
+                    <h2 className="text-base font-semibold text-white">
+                      {post.filmTitle ?? post.content}
+                    </h2>
+                    <p className="text-sm text-gray-300">
+                      {post.content}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                    <span>{post.comments}</span>
+                  <div className="flex items-center gap-6 text-xs text-gray-500 mt-2">
+                    <div className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                      <span>{post.likeCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                      <span>{post.commentCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                      <span>{post.viewCount}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                    <span>{post.views}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </section>
         </div>
 
@@ -191,19 +209,25 @@ export const DiscussionView = () => {
               <span>Sujets Tendances</span>
             </h2>
             <div className="space-y-2">
-              {mockTrending.map((topic) => (
-                <div
-                  key={topic.id}
-                  className="flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-gray-900 via-gray-900 to-transparent border border-[#9747FF]/30 hover:border-[#9747FF]/60 transition-colors"
-                >
-                  <span className="text-xs text-white">
-                    {topic.label}
-                  </span>
-                  <span className="text-[11px] text-gray-400">
-                    {topic.postsCount}
-                  </span>
-                </div>
-              ))}
+              {topics.length === 0 ? (
+                <p className="text-xs text-gray-500">
+                  Pas encore de sujets tendances.
+                </p>
+              ) : (
+                topics.map((topic) => (
+                  <div
+                    key={topic.name}
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-gray-900 via-gray-900 to-transparent border border-[#9747FF]/30 hover:border-[#9747FF]/60 transition-colors"
+                  >
+                    <span className="text-xs text-white">
+                      #{topic.name}
+                    </span>
+                    <span className="text-[11px] text-gray-400">
+                      {topic.postCount} post{topic.postCount > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </section>
 
