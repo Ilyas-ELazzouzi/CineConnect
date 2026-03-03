@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { ProfilView } from '../views';
+import { createFileRoute } from "@tanstack/react-router";
+import { ProfilView } from "../pages";
 
-export const Route = createFileRoute('/profil')({
+export const Route = createFileRoute("/profil")({
   component: ProfilView,
 });
