@@ -7,3 +7,4 @@ export { friends } from './friends';
 export { communityPosts } from './communityPosts';
 export { postComments } from './postComments';
 export { postLikes } from './postLikes';
+export { filmComments } from './filmComments';
