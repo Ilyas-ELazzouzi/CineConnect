@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FilmCard, Loading } from '../components';
-import { useFilmsStore } from '../store';
+import { useFilmsStore } from '../hooks';
 
 interface FilmsByCategoryViewProps {
   category: string;

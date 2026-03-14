@@ -6,7 +6,7 @@ import {
   fetchTrendingTopics,
   createCommunityPost,
 } from "../lib/community";
-import { useAuthStore } from "../store";
+import { useAuthStore } from "../hooks";
 
 export const DiscussionView = () => {
   const [activeFilter, setActiveFilter] = useState<"all" | "trending" | "hot">(

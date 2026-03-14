@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Hero, TrendingSection } from "../components";
-import { useFilmsStore } from "../store";
+import { useFilmsStore } from "../hooks";
 
 export const HomeView = () => {
   const {

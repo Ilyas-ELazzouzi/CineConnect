@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '../components';
-import { useAuthStore } from '../store';
+import { useAuthStore } from '../hooks';
 
 export const RegisterView = () => {
   const navigate = useNavigate();

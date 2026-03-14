@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { TrendingFilmCard } from './TrendingFilmCard';
 import { Loading } from './Loading';
-import { useFilmsStore } from '../store';
+import { useFilmsStore } from '../hooks';
 
 export const TrendingSection = () => {
   const { films, isLoading, fetchPopularFilms } = useFilmsStore();

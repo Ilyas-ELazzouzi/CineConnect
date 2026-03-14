@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Loading } from '../components';
-import { useFilmsStore } from '../store';
+import { useFilmsStore } from '../hooks';
 import { cleanPosterUrl } from '../lib/imageUtils';
 
 interface FilmDetailViewProps {

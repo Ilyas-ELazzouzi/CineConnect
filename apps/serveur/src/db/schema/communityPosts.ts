@@ -3,8 +3,7 @@ import { users } from './users';
 
 export const communityPosts = pgTable('community_posts', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
-    .notNull()
+  userId: uuid('user_id').notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
   content: text('content').notNull(),
   filmTitle: text('film_title'),

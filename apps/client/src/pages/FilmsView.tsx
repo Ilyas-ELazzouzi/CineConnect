@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CollectionFilmCard, Loading } from "../components";
 import { SearchIcon, FilterIcon } from "../components/icons";
-import { useFilmsStore } from "../store";
+import { useFilmsStore } from "../hooks";
 
 export const FilmsView = () => {
   const {

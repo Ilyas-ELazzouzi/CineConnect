@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
-import { useAuthStore } from '../store';
+import { useAuthStore } from '../hooks';
 
 export const LoginView = () => {
   const navigate = useNavigate();

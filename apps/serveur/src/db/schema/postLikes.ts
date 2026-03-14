@@ -6,11 +6,9 @@ export const postLikes = pgTable(
   'post_likes',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    postId: uuid('post_id')
-      .notNull()
+    postId: uuid('post_id').notNull()
       .references(() => communityPosts.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id')
-      .notNull()
+    userId: uuid('user_id').notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
