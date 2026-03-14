@@ -11,6 +11,7 @@ import { registerHealthRoutes } from './routes/health.js';
 import { registerOmdbRoutes } from './routes/omdb.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerCommunityRoutes } from './routes/community.js';
+import { registerFilmCommentRoutes } from './routes/filmComments.js';
 import { buildOpenApiSpec } from './openapi/apiCart.js';
 import { errorHandler } from './middlewares/error.js';
 
@@ -47,6 +48,7 @@ export function createApp(opts: { env: Env; db?: Db }) {
   if (db) {
     registerAuthRoutes(router, { db, jwtSecret: env.JWT_SECRET, jwtExpiresIn: env.JWT_EXPIRES_IN });
     registerCommunityRoutes(router, { db, jwtSecret: env.JWT_SECRET });
+    registerFilmCommentRoutes(router, { db, jwtSecret: env.JWT_SECRET });
   }
   app.use(router);
 
