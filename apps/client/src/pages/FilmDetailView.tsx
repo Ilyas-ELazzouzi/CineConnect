@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Loading } from '../components';
-import { useFilmsStore } from '../hooks';
+import { useFilmsStore, useAuthStore } from '../hooks';
 import { cleanPosterUrl } from '../lib/imageUtils';
+import { fetchFilmComments, createFilmComment, type FilmComment } from '../lib/filmComments';
 
 interface FilmDetailViewProps {
   filmId: string;
@@ -9,9 +10,27 @@ interface FilmDetailViewProps {
 
 export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
   const { getFilmById, isLoading } = useFilmsStore();
+  const { token, isAuthenticated } = useAuthStore();
   const [film, setFilm] = useState<any>(null);
   const [imageError, setImageError] = useState(false);
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [comments, setComments] = useState<FilmComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
+
+  const loadComments = useCallback(async (imdbId: string) => {
+    setCommentsLoading(true);
+    try {
+      const list = await fetchFilmComments(imdbId);
+      setComments(list);
+    } catch {
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const loadFilm = async () => {
@@ -21,9 +40,10 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
         const cleaned = cleanPosterUrl(filmData.poster);
         setPosterUrl(cleaned);
       }
+      if (filmData?.id) loadComments(filmData.id);
     };
     loadFilm();
-  }, [filmId]);
+  }, [filmId, loadComments]);
 
   if (isLoading || !film) {
     return (
@@ -126,11 +146,78 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
 
         <div className="bg-gray-900 p-6 rounded-lg shadow">
           <h2 className="text-2xl font-display font-semibold text-white mb-4">
-            Informations supplémentaires
+            Commentaires
           </h2>
-          <p className="text-gray-400">
-            En Phase 1, les fonctionnalités de notation et de commentaires seront disponibles après l'intégration du backend.
-          </p>
+          {isAuthenticated && token && (
+            <form
+              className="mb-6"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!film?.id || !commentText.trim() || !token) return;
+                setCommentError(null);
+                setCommentSubmitting(true);
+                try {
+                  const newComment = await createFilmComment(film.id, commentText.trim(), token);
+                  setComments((prev) => [newComment, ...prev]);
+                  setCommentText('');
+                } catch (err) {
+                  setCommentError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi');
+                } finally {
+                  setCommentSubmitting(false);
+                }
+              }}
+            >
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Écrivez un commentaire..."
+                className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 placeholder-gray-500 focus:border-[#9747FF] focus:ring-1 focus:ring-[#9747FF] resize-none"
+                rows={3}
+                maxLength={2000}
+                disabled={commentSubmitting}
+              />
+              {commentError && (
+                <p className="mt-2 text-sm text-red-400">{commentError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={commentSubmitting || !commentText.trim()}
+                className="mt-2 px-4 py-2 bg-[#9747FF] text-white font-medium rounded-lg hover:bg-[#7B2FCC] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {commentSubmitting ? 'Envoi...' : 'Publier'}
+              </button>
+            </form>
+          )}
+          {!isAuthenticated && (
+            <p className="text-gray-400 mb-4">Connectez-vous pour laisser un commentaire.</p>
+          )}
+          {commentsLoading ? (
+            <p className="text-gray-400">Chargement des commentaires...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-gray-500">Aucun commentaire pour le moment.</p>
+          ) : (
+            <ul className="space-y-4">
+              {comments.map((c) => (
+                <li key={c.id} className="border-b border-gray-800 pb-4 last:border-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-[#9747FF]">
+                      {c.author?.username ?? 'Utilisateur'}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(c.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-gray-300 whitespace-pre-wrap">{c.comment}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
