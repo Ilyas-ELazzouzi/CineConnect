@@ -9,3 +9,4 @@ export { postComments } from './postComments';
 export { postLikes } from './postLikes';
 export { filmComments } from './filmComments';
 export { filmCommentReactions } from './filmCommentReactions';
+export { filmRatings } from './filmRatings';
