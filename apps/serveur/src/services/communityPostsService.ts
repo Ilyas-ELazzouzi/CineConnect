@@ -1,6 +1,6 @@
-import { eq, desc, sql, inArray } from 'drizzle-orm';
+import { eq, desc, sql, inArray, and } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
-import { communityPosts, postComments, postLikes, users } from '../db/schema/index.js';
+import { communityPosts, postComments, postReactions, users } from '../db/schema/index.js';
 
 export type PostWithMeta = {
   id: string;
@@ -13,9 +13,15 @@ export type PostWithMeta = {
   author: { id: string; username: string; avatarUrl: string | null };
   commentCount: number;
   likeCount: number;
+  dislikeCount: number;
+  userReaction: number | null;
 };
 
-export async function listPostsService(db: Db, limit = 50): Promise<PostWithMeta[]> {
+export async function listPostsService(
+  db: Db,
+  limit = 50,
+  currentUserId?: string,
+): Promise<PostWithMeta[]> {
   const rows = await db
     .select({
       id: communityPosts.id,
@@ -52,15 +58,46 @@ export async function listPostsService(db: Db, limit = 50): Promise<PostWithMeta
       ? []
       : await db
           .select({
-            postId: postLikes.postId,
-            count: sql<number>`count(*)::int`,
+            postId: postReactions.postId,
+            count: sql<string | number>`count(*)`,
           })
-          .from(postLikes)
-          .where(inArray(postLikes.postId, postIds))
-          .groupBy(postLikes.postId);
+          .from(postReactions)
+          .where(and(inArray(postReactions.postId, postIds), eq(postReactions.value, 1)))
+          .groupBy(postReactions.postId);
+
+  const dislikeCounts =
+    postIds.length === 0
+      ? []
+      : await db
+          .select({
+            postId: postReactions.postId,
+            count: sql<string | number>`count(*)`,
+          })
+          .from(postReactions)
+          .where(and(inArray(postReactions.postId, postIds), eq(postReactions.value, -1)))
+          .groupBy(postReactions.postId);
+
+  let userReactions = new Map<string, number>();
+  if (currentUserId && postIds.length > 0) {
+    const userRows = await db
+      .select({ postId: postReactions.postId, value: postReactions.value })
+      .from(postReactions)
+      .where(
+        and(
+          inArray(postReactions.postId, postIds),
+          eq(postReactions.userId, currentUserId),
+        ),
+      );
+    userReactions = new Map(userRows.map((u) => [u.postId, u.value]));
+  }
 
   const commentByPost = new Map(commentCounts.map((c) => [c.postId, c.count]));
-  const likeByPost = new Map(likeCounts.map((l) => [l.postId, l.count]));
+  const likeByPost = new Map(
+    likeCounts.map((l) => [l.postId, l.count != null ? Number(l.count) : 0]),
+  );
+  const dislikeByPost = new Map(
+    dislikeCounts.map((d) => [d.postId, d.count != null ? Number(d.count) : 0]),
+  );
 
   return rows.map((r) => ({
     id: r.id,
@@ -73,6 +110,8 @@ export async function listPostsService(db: Db, limit = 50): Promise<PostWithMeta
     author: { id: r.userId, username: r.username, avatarUrl: r.avatarUrl },
     commentCount: commentByPost.get(r.id) ?? 0,
     likeCount: likeByPost.get(r.id) ?? 0,
+    dislikeCount: dislikeByPost.get(r.id) ?? 0,
+    userReaction: userReactions.get(r.id) ?? null,
   }));
 }
 
@@ -109,6 +148,7 @@ export async function createPostService(
         author: user ? { id: userId, username: user.username, avatarUrl: user.avatarUrl } : null,
         commentCount: 0,
         likeCount: 0,
+        dislikeCount: 0,
       },
     },
   } as const;
@@ -141,10 +181,14 @@ export async function getPostByIdService(db: Db, postId: string) {
     .from(postComments)
     .where(eq(postComments.postId, postId));
 
-  const [likeCount] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(postLikes)
-    .where(eq(postLikes.postId, postId));
+  const [likeRow] = await db
+    .select({ count: sql<string | number>`count(*)` })
+    .from(postReactions)
+    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, 1)));
+  const [dislikeRow] = await db
+    .select({ count: sql<string | number>`count(*)` })
+    .from(postReactions)
+    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, -1)));
 
   return {
     status: 200,
@@ -153,7 +197,8 @@ export async function getPostByIdService(db: Db, postId: string) {
         ...row,
         author: { id: row.userId, username: row.username, avatarUrl: row.avatarUrl },
         commentCount: commentCount?.count ?? 0,
-        likeCount: likeCount?.count ?? 0,
+        likeCount: likeRow?.count != null ? Number(likeRow.count) : 0,
+        dislikeCount: dislikeRow?.count != null ? Number(dislikeRow.count) : 0,
       },
     },
   } as const;
