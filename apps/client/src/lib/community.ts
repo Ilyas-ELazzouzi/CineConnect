@@ -18,6 +18,14 @@ export interface CommunityPost {
   author: CommunityAuthor | null;
   commentCount: number;
   likeCount: number;
+  dislikeCount?: number;
+  userReaction?: number | null;
+}
+
+export interface PostReactionResult {
+  likeCount: number;
+  dislikeCount: number;
+  userReaction: number | null;
 }
 
 export interface TrendingTopic {
@@ -25,14 +33,49 @@ export interface TrendingTopic {
   postCount: number;
 }
 
-export async function fetchCommunityPosts(limit: number = 50): Promise<CommunityPost[]> {
+export async function fetchCommunityPosts(
+  limit: number = 50,
+  token?: string | null,
+): Promise<CommunityPost[]> {
   const base = getApiBase();
-  const res = await fetch(`${base}/api/community/posts?limit=${limit}`);
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${base}/api/community/posts?limit=${limit}`, { headers });
   const data = (await res.json()) as { posts?: CommunityPost[]; error?: string };
   if (!res.ok) {
     throw new Error(data.error ?? 'Erreur lors du chargement des posts');
   }
   return data.posts ?? [];
+}
+
+export async function setPostReaction(
+  postId: string,
+  value: 1 | -1,
+  token: string,
+): Promise<PostReactionResult> {
+  const base = getApiBase();
+  const res = await fetch(`${base}/api/community/posts/${encodeURIComponent(postId)}/reaction`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ value }),
+  });
+  const data = (await res.json()) as {
+    likeCount?: number;
+    dislikeCount?: number;
+    userReaction?: number | null;
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(data.error ?? 'Erreur lors de la réaction');
+  }
+  return {
+    likeCount: data.likeCount ?? 0,
+    dislikeCount: data.dislikeCount ?? 0,
+    userReaction: data.userReaction ?? null,
+  };
 }
 
 export async function fetchTrendingTopics(limit: number = 10): Promise<TrendingTopic[]> {
