@@ -14,16 +14,64 @@ export interface FilmComment {
   comment: string;
   createdAt: string;
   author: FilmCommentAuthor | null;
+  likeCount?: number;
+  dislikeCount?: number;
+  userReaction?: number | null;
 }
 
-export async function fetchFilmComments(imdbId: string): Promise<FilmComment[]> {
+export interface FilmCommentReactionResult {
+  likeCount: number;
+  dislikeCount: number;
+  userReaction: number | null;
+}
+
+export async function fetchFilmComments(
+  imdbId: string,
+  token?: string | null,
+): Promise<FilmComment[]> {
   const base = getApiBase();
-  const res = await fetch(`${base}/api/films/${encodeURIComponent(imdbId)}/comments`);
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${base}/api/films/${encodeURIComponent(imdbId)}/comments`, { headers });
   const data = (await res.json()) as { comments?: FilmComment[]; error?: string };
   if (!res.ok) {
     throw new Error(data.error ?? 'Erreur lors du chargement des commentaires');
   }
   return data.comments ?? [];
+}
+
+export async function setFilmCommentReaction(
+  imdbId: string,
+  commentId: string,
+  value: 1 | -1,
+  token: string,
+): Promise<FilmCommentReactionResult> {
+  const base = getApiBase();
+  const res = await fetch(
+    `${base}/api/films/${encodeURIComponent(imdbId)}/comments/${encodeURIComponent(commentId)}/reaction`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ value }),
+    },
+  );
+  const data = (await res.json()) as {
+    likeCount?: number;
+    dislikeCount?: number;
+    userReaction?: number | null;
+    error?: string;
+  };
+  if (!res.ok) {
+    throw new Error(data.error ?? 'Erreur lors de la réaction');
+  }
+  return {
+    likeCount: data.likeCount ?? 0,
+    dislikeCount: data.dislikeCount ?? 0,
+    userReaction: data.userReaction ?? null,
+  };
 }
 
 export async function createFilmComment(

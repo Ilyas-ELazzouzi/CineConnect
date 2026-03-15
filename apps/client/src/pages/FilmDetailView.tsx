@@ -2,7 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Loading } from '../components';
 import { useFilmsStore, useAuthStore } from '../hooks';
 import { cleanPosterUrl } from '../lib/imageUtils';
-import { fetchFilmComments, createFilmComment, type FilmComment } from '../lib/filmComments';
+import {
+  fetchFilmComments,
+  createFilmComment,
+  setFilmCommentReaction,
+  type FilmComment,
+} from '../lib/filmComments';
 
 interface FilmDetailViewProps {
   filmId: string;
@@ -19,11 +24,12 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
   const [commentText, setCommentText] = useState('');
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
+  const [reactingCommentId, setReactingCommentId] = useState<string | null>(null);
 
-  const loadComments = useCallback(async (imdbId: string) => {
+  const loadComments = useCallback(async (imdbId: string, authToken?: string | null) => {
     setCommentsLoading(true);
     try {
-      const list = await fetchFilmComments(imdbId);
+      const list = await fetchFilmComments(imdbId, authToken);
       setComments(list);
     } catch {
       setComments([]);
@@ -40,10 +46,10 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
         const cleaned = cleanPosterUrl(filmData.poster);
         setPosterUrl(cleaned);
       }
-      if (filmData?.id) loadComments(filmData.id);
+      if (filmData?.id) loadComments(filmData.id, token);
     };
     loadFilm();
-  }, [filmId, loadComments]);
+  }, [filmId, loadComments, token]);
 
   if (isLoading || !film) {
     return (
@@ -158,7 +164,15 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
                 setCommentSubmitting(true);
                 try {
                   const newComment = await createFilmComment(film.id, commentText.trim(), token);
-                  setComments((prev) => [newComment, ...prev]);
+                  setComments((prev) => [
+                    {
+                      ...newComment,
+                      likeCount: 0,
+                      dislikeCount: 0,
+                      userReaction: null,
+                    },
+                    ...prev,
+                  ]);
                   setCommentText('');
                 } catch (err) {
                   setCommentError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi');
@@ -214,6 +228,92 @@ export const FilmDetailView: React.FC<FilmDetailViewProps> = ({ filmId }) => {
                     </span>
                   </div>
                   <p className="text-gray-300 whitespace-pre-wrap">{c.comment}</p>
+                  {isAuthenticated && token && (
+                    <div className="flex items-center gap-4 mt-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!film?.id || !token) return;
+                          setReactingCommentId(c.id);
+                          try {
+                            const result = await setFilmCommentReaction(
+                              film.id,
+                              c.id,
+                              1,
+                              token,
+                            );
+                            setComments((prev) =>
+                              prev.map((x) =>
+                                x.id === c.id
+                                  ? {
+                                      ...x,
+                                      likeCount: result.likeCount,
+                                      dislikeCount: result.dislikeCount,
+                                      userReaction: result.userReaction,
+                                    }
+                                  : x,
+                              ),
+                            );
+                          } finally {
+                            setReactingCommentId(null);
+                          }
+                        }}
+                        disabled={reactingCommentId === c.id}
+                        className={`flex items-center gap-1 text-sm rounded px-2 py-1 transition ${
+                          c.userReaction === 1
+                            ? 'bg-[#9747FF]/30 text-[#9747FF]'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        } disabled:opacity-50`}
+                        title="J'aime"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 000 2v3h3.56a1 1 0 01.962.726l1.2 6A1 1 0 0115.56 16H8.943a1 1 0 00-.447.106l-.05.025A1 1 0 018 13.763v-5.43a1 1 0 00-.657-.928l-2.382-.794A1 1 0 014 6.257v.676a1 1 0 001 1z" />
+                        </svg>
+                        <span>{c.likeCount ?? 0}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!film?.id || !token) return;
+                          setReactingCommentId(c.id);
+                          try {
+                            const result = await setFilmCommentReaction(
+                              film.id,
+                              c.id,
+                              -1,
+                              token,
+                            );
+                            setComments((prev) =>
+                              prev.map((x) =>
+                                x.id === c.id
+                                  ? {
+                                      ...x,
+                                      likeCount: result.likeCount,
+                                      dislikeCount: result.dislikeCount,
+                                      userReaction: result.userReaction,
+                                    }
+                                  : x,
+                              ),
+                            );
+                          } finally {
+                            setReactingCommentId(null);
+                          }
+                        }}
+                        disabled={reactingCommentId === c.id}
+                        className={`flex items-center gap-1 text-sm rounded px-2 py-1 transition ${
+                          c.userReaction === -1
+                            ? 'bg-red-500/30 text-red-400'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        } disabled:opacity-50`}
+                        title="Je n'aime pas"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 000-2v-3H4.44a1 1 0 01-.962-.726l-1.2-6A1 1 0 014.44 4H11.055a1 1 0 01.447.106l.05.025A1 1 0 0112 6.237v5.43a1 1 0 00.657.928l2.382.794A1 1 0 0016 13.743v-.676a1 1 0 00-1-1z" />
+                        </svg>
+                        <span>{c.dislikeCount ?? 0}</span>
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
