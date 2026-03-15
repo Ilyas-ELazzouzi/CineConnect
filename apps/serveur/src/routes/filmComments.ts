@@ -2,6 +2,7 @@ import type { Router } from 'express';
 import { z } from 'zod';
 import type { Db } from '../db/client.js';
 import { requireAuth, type AuthedRequest } from '../middlewares/auth.js';
+import { verifyAccessToken } from '../auth/jwt.js';
 import { listCommentsByImdbId, createFilmComment } from '../services/filmCommentsService.js';
 import { setFilmCommentReaction } from '../services/filmCommentReactionsService.js';
 
@@ -20,7 +21,17 @@ export function registerFilmCommentRoutes(
   router.get('/api/films/:imdbId/comments', async (req, res, next) => {
     try {
       const { imdbId } = req.params;
-      const result = await listCommentsByImdbId(opts.db, imdbId);
+      let currentUserId: string | undefined;
+      const auth = req.header('authorization');
+      if (auth?.toLowerCase().startsWith('bearer ')) {
+        try {
+          const payload = verifyAccessToken(auth.slice(7).trim(), opts.jwtSecret);
+          currentUserId = payload.sub;
+        } catch {
+          // token invalid or expired, list without user reaction
+        }
+      }
+      const result = await listCommentsByImdbId(opts.db, imdbId, currentUserId);
       res.status(result.status).json(result.body);
     } catch (e) {
       next(e);

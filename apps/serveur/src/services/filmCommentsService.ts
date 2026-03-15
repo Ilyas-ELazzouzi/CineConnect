@@ -1,8 +1,8 @@
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray, sql, and } from 'drizzle-orm';
 import type { Db } from '../db/client.js';
-import { filmComments, users } from '../db/schema/index.js';
+import { filmComments, users, filmCommentReactions } from '../db/schema/index.js';
 
-export async function listCommentsByImdbId(db: Db, imdbId: string) {
+export async function listCommentsByImdbId(db: Db, imdbId: string, currentUserId?: string) {
   const rows = await db
     .select({
       id: filmComments.id,
@@ -18,6 +18,44 @@ export async function listCommentsByImdbId(db: Db, imdbId: string) {
     .where(eq(filmComments.imdbId, imdbId))
     .orderBy(desc(filmComments.createdAt));
 
+  const commentIds = rows.map((r) => r.id);
+  const likeCounts = new Map<string, number>();
+  const dislikeCounts = new Map<string, number>();
+  const userReactions = new Map<string, number>();
+
+  if (commentIds.length > 0) {
+    const counts = await db
+      .select({
+        filmCommentId: filmCommentReactions.filmCommentId,
+        value: filmCommentReactions.value,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(filmCommentReactions)
+      .where(inArray(filmCommentReactions.filmCommentId, commentIds))
+      .groupBy(filmCommentReactions.filmCommentId, filmCommentReactions.value);
+
+    for (const c of counts) {
+      if (c.value === 1) likeCounts.set(c.filmCommentId, c.count);
+      else if (c.value === -1) dislikeCounts.set(c.filmCommentId, c.count);
+    }
+
+    if (currentUserId) {
+      const userRows = await db
+        .select({
+          filmCommentId: filmCommentReactions.filmCommentId,
+          value: filmCommentReactions.value,
+        })
+        .from(filmCommentReactions)
+        .where(
+          and(
+            inArray(filmCommentReactions.filmCommentId, commentIds),
+            eq(filmCommentReactions.userId, currentUserId),
+          ),
+        );
+      for (const r of userRows) userReactions.set(r.filmCommentId, r.value);
+    }
+  }
+
   return {
     status: 200,
     body: {
@@ -28,6 +66,9 @@ export async function listCommentsByImdbId(db: Db, imdbId: string) {
         comment: r.comment,
         createdAt: r.createdAt,
         author: { id: r.userId, username: r.username, avatarUrl: r.avatarUrl },
+        likeCount: likeCounts.get(r.id) ?? 0,
+        dislikeCount: dislikeCounts.get(r.id) ?? 0,
+        userReaction: userReactions.get(r.id) ?? null,
       })),
     },
   } as const;
