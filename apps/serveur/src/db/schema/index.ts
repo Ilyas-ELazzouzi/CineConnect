@@ -7,6 +7,7 @@ export { friends } from './friends';
 export { communityPosts } from './communityPosts';
 export { postComments } from './postComments';
 export { postLikes } from './postLikes';
+export { postReactions } from './postReactions';
 export { filmComments } from './filmComments';
 export { filmCommentReactions } from './filmCommentReactions';
 export { filmRatings } from './filmRatings';

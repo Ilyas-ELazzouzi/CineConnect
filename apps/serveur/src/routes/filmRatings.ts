@@ -6,7 +6,7 @@ import { verifyAccessToken } from '../auth/jwt.js';
 import { getFilmRatingInfo, setFilmRating } from '../services/filmRatingsService.js';
 
 const SetRatingSchema = z.object({
-  rating: z.number().min(1).max(5),
+  rating: z.coerce.number().min(1).max(5),
 });
 
 export function registerFilmRatingRoutes(

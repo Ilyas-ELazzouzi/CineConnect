@@ -13,6 +13,8 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return;
   }
 
-  res.status(500).json({ error: 'Erreur serveur' });
+  const message =
+    process.env.NODE_ENV !== 'production' && err instanceof Error ? err.message : 'Erreur serveur';
+  res.status(500).json({ error: message });
 }
 
