@@ -3,9 +3,14 @@ import { z } from 'zod';
 import type { Db } from '../db/client.js';
 import { requireAuth, type AuthedRequest } from '../middlewares/auth.js';
 import { listCommentsByImdbId, createFilmComment } from '../services/filmCommentsService.js';
+import { setFilmCommentReaction } from '../services/filmCommentReactionsService.js';
 
 const CreateCommentSchema = z.object({
   content: z.string().min(1).max(2000),
+});
+
+const ReactionSchema = z.object({
+  value: z.union([z.literal(1), z.literal(-1)]),
 });
 
 export function registerFilmCommentRoutes(
@@ -31,6 +36,22 @@ export function registerFilmCommentRoutes(
         const body = CreateCommentSchema.parse(req.body);
         const user = (req as AuthedRequest).user;
         const result = await createFilmComment(opts.db, imdbId, user.id, body.content);
+        res.status(result.status).json(result.body);
+      } catch (e) {
+        next(e);
+      }
+    },
+  );
+
+  router.post(
+    '/api/films/:imdbId/comments/:commentId/reaction',
+    requireAuth(opts.jwtSecret),
+    async (req, res, next) => {
+      try {
+        const { commentId } = req.params;
+        const body = ReactionSchema.parse(req.body);
+        const user = (req as AuthedRequest).user;
+        const result = await setFilmCommentReaction(opts.db, commentId, user.id, body.value);
         res.status(result.status).json(result.body);
       } catch (e) {
         next(e);
