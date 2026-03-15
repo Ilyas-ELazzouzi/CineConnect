@@ -5,6 +5,7 @@ import {
   fetchCommunityPosts,
   fetchTrendingTopics,
   createCommunityPost,
+  setPostReaction,
 } from "../lib/community";
 import { useAuthStore } from "../hooks";
 
@@ -17,6 +18,7 @@ export const DiscussionView = () => {
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reactingPostId, setReactingPostId] = useState<string | null>(null);
   const { token, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export const DiscussionView = () => {
         setLoading(true);
         setError(null);
         const [fetchedPosts, fetchedTopics] = await Promise.all([
-          fetchCommunityPosts(50),
+          fetchCommunityPosts(50, token),
           fetchTrendingTopics(10),
         ]);
         setPosts(fetchedPosts);
@@ -37,7 +39,7 @@ export const DiscussionView = () => {
       }
     };
     load();
-  }, []);
+  }, [token]);
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +59,9 @@ export const DiscussionView = () => {
         setPosts((prev) => [
           {
             ...post,
+            likeCount: 0,
+            dislikeCount: 0,
+            userReaction: null,
             author: post.author ?? {
               id: post.userId,
               username: "Vous",
@@ -183,10 +188,89 @@ export const DiscussionView = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-6 text-xs text-gray-500 mt-2">
-                    <div className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-                      <span>{post.likeCount}</span>
-                    </div>
+                    {isAuthenticated && token ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!token) return;
+                            setReactingPostId(post.id);
+                            try {
+                              const result = await setPostReaction(post.id, 1, token);
+                              setPosts((prev) =>
+                                prev.map((p) =>
+                                  p.id === post.id
+                                    ? {
+                                        ...p,
+                                        likeCount: result.likeCount,
+                                        dislikeCount: result.dislikeCount,
+                                        userReaction: result.userReaction,
+                                      }
+                                    : p
+                                )
+                              );
+                            } finally {
+                              setReactingPostId(null);
+                            }
+                          }}
+                          disabled={reactingPostId === post.id}
+                          className={`flex items-center gap-1 rounded px-2 py-1 transition disabled:opacity-50 ${
+                            post.userReaction === 1
+                              ? "bg-[#9747FF]/30 text-[#9747FF]"
+                              : "hover:bg-gray-800 text-gray-500 hover:text-white"
+                          }`}
+                          title="J'aime"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 000 2v3h3.56a1 1 0 01.962.726l1.2 6A1 1 0 0115.56 16H8.943a1 1 0 00-.447.106l-.05.025A1 1 0 018 13.763v-5.43a1 1 0 00-.657-.928l-2.382-.794A1 1 0 014 6.257v.676a1 1 0 001 1z" />
+                          </svg>
+                          <span>{post.likeCount ?? 0}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!token) return;
+                            setReactingPostId(post.id);
+                            try {
+                              const result = await setPostReaction(post.id, -1, token);
+                              setPosts((prev) =>
+                                prev.map((p) =>
+                                  p.id === post.id
+                                    ? {
+                                        ...p,
+                                        likeCount: result.likeCount,
+                                        dislikeCount: result.dislikeCount,
+                                        userReaction: result.userReaction,
+                                      }
+                                    : p
+                                )
+                              );
+                            } finally {
+                              setReactingPostId(null);
+                            }
+                          }}
+                          disabled={reactingPostId === post.id}
+                          className={`flex items-center gap-1 rounded px-2 py-1 transition disabled:opacity-50 ${
+                            post.userReaction === -1
+                              ? "bg-red-500/30 text-red-400"
+                              : "hover:bg-gray-800 text-gray-500 hover:text-white"
+                          }`}
+                          title="Je n'aime pas"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 000-2v-3H4.44a1 1 0 01-.962-.726l-1.2-6A1 1 0 014.44 4H11.055a1 1 0 01.447.106l.05.025A1 1 0 0112 6.237v5.43a1 1 0 00.657.928l2.382.794A1 1 0 0016 13.743v-.676a1 1 0 00-1-1z" />
+                          </svg>
+                          <span>{post.dislikeCount ?? 0}</span>
+                        </button>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                        <span>{post.likeCount ?? 0}</span>
+                        <span className="mx-1">·</span>
+                        <span>{post.dislikeCount ?? 0}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
                       <span>{post.commentCount}</span>
