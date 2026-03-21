@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { HomeIcon, FilmsIcon, CommunityIcon, ProfileIcon, SearchIcon } from './icons';
+import { HomeIcon, FilmsIcon, CommunityIcon, MessagesIcon, ProfileIcon, SearchIcon } from './icons';
 
 export const Header = () => {
   const location = useLocation();
@@ -8,6 +8,7 @@ export const Header = () => {
     { to: '/', label: 'Accueil', icon: HomeIcon },
     { to: '/films', label: 'Films', icon: FilmsIcon },
     { to: '/discussion', label: 'Communauté', icon: CommunityIcon },
+    { to: '/messages', label: 'Messages', icon: MessagesIcon },
     { to: '/profil', label: 'Profil', icon: ProfileIcon },
   ];
 
