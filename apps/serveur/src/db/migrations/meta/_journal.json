@@ -43,6 +43,13 @@
       "when": 1773587428633,
       "tag": "0005_puzzling_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774111635789,
+      "tag": "0006_magenta_reavers",
+      "breakpoints": true
     }
   ]
 }
