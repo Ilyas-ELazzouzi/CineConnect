@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   type CommunityPost,
   type TrendingTopic,
+  type CommunityFeedSort,
   fetchCommunityPosts,
   fetchTrendingTopics,
   createCommunityPost,
@@ -10,9 +11,7 @@ import {
 import { useAuthStore } from "../hooks";
 
 export const DiscussionView = () => {
-  const [activeFilter, setActiveFilter] = useState<"all" | "trending" | "hot">(
-    "all"
-  );
+  const [activeFilter, setActiveFilter] = useState<CommunityFeedSort>("all");
   const [newPostContent, setNewPostContent] = useState("");
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
@@ -27,7 +26,7 @@ export const DiscussionView = () => {
         setLoading(true);
         setError(null);
         const [fetchedPosts, fetchedTopics] = await Promise.all([
-          fetchCommunityPosts(50, token),
+          fetchCommunityPosts(50, token, activeFilter),
           fetchTrendingTopics(10),
         ]);
         setPosts(fetchedPosts);
@@ -39,7 +38,7 @@ export const DiscussionView = () => {
       }
     };
     load();
-  }, [token]);
+  }, [token, activeFilter]);
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +104,7 @@ export const DiscussionView = () => {
                 <button
                   key={tab.id}
                   onClick={() =>
-                    setActiveFilter(tab.id as "all" | "trending" | "hot")
+                    setActiveFilter(tab.id as CommunityFeedSort)
                   }
                   className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
                     isActive
