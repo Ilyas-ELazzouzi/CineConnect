@@ -17,27 +17,52 @@ export type PostWithMeta = {
   userReaction: number | null;
 };
 
+export type CommunityFeedSort = 'all' | 'trending' | 'hot';
+
+const likeCountOrderExpr = sql`(SELECT COALESCE(COUNT(*)::int, 0) FROM post_reactions pr WHERE pr.post_id = ${communityPosts.id} AND pr.value = 1)`;
+
 export async function listPostsService(
   db: Db,
   limit = 50,
   currentUserId?: string,
+  sort: CommunityFeedSort = 'all',
 ): Promise<PostWithMeta[]> {
-  const rows = await db
-    .select({
-      id: communityPosts.id,
-      userId: communityPosts.userId,
-      content: communityPosts.content,
-      filmTitle: communityPosts.filmTitle,
-      imageUrl: communityPosts.imageUrl,
-      viewCount: communityPosts.viewCount,
-      createdAt: communityPosts.createdAt,
-      username: users.username,
-      avatarUrl: users.avatarUrl,
-    })
-    .from(communityPosts)
-    .innerJoin(users, eq(communityPosts.userId, users.id))
-    .orderBy(desc(communityPosts.createdAt))
-    .limit(limit);
+  const selectFields = {
+    id: communityPosts.id,
+    userId: communityPosts.userId,
+    content: communityPosts.content,
+    filmTitle: communityPosts.filmTitle,
+    imageUrl: communityPosts.imageUrl,
+    viewCount: communityPosts.viewCount,
+    createdAt: communityPosts.createdAt,
+    username: users.username,
+    avatarUrl: users.avatarUrl,
+  };
+
+  let rows;
+  if (sort === 'trending') {
+    rows = await db
+      .select(selectFields)
+      .from(communityPosts)
+      .innerJoin(users, eq(communityPosts.userId, users.id))
+      .orderBy(desc(likeCountOrderExpr), desc(communityPosts.createdAt))
+      .limit(limit);
+  } else if (sort === 'hot') {
+    rows = await db
+      .select(selectFields)
+      .from(communityPosts)
+      .innerJoin(users, eq(communityPosts.userId, users.id))
+      .where(sql`${communityPosts.createdAt} >= NOW() - INTERVAL '7 days'`)
+      .orderBy(desc(communityPosts.createdAt))
+      .limit(limit);
+  } else {
+    rows = await db
+      .select(selectFields)
+      .from(communityPosts)
+      .innerJoin(users, eq(communityPosts.userId, users.id))
+      .orderBy(desc(communityPosts.createdAt))
+      .limit(limit);
+  }
 
   const postIds = rows.map((r) => r.id);
 
