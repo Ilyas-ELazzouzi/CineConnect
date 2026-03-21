@@ -6,3 +6,4 @@ export { LoginView } from './LoginView';
 export { RegisterView } from './RegisterView';
 export { ProfilView } from './ProfilView';
 export { DiscussionView } from './DiscussionView';
+export { MessagesView } from './MessagesView';

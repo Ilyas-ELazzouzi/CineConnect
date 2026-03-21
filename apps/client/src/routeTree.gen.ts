@@ -14,6 +14,7 @@ import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FilmsRouteImport } from './routes/films'
 import { Route as DiscussionRouteImport } from './routes/discussion'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FilmsCategorieRouteImport } from './routes/films.$categorie'
 import { Route as FilmIdRouteImport } from './routes/film.$id'
@@ -43,6 +44,11 @@ const DiscussionRoute = DiscussionRouteImport.update({
   path: '/discussion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -62,6 +68,7 @@ const FilmIdRoute = FilmIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discussion': typeof DiscussionRoute
+  '/messages': typeof MessagesRoute
   '/films': typeof FilmsRouteWithChildren
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
@@ -72,6 +79,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discussion': typeof DiscussionRoute
+  '/messages': typeof MessagesRoute
   '/films': typeof FilmsRouteWithChildren
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
@@ -83,6 +91,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/discussion': typeof DiscussionRoute
+  '/messages': typeof MessagesRoute
   '/films': typeof FilmsRouteWithChildren
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/discussion'
+    | '/messages'
     | '/films'
     | '/login'
     | '/profil'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/discussion'
+    | '/messages'
     | '/films'
     | '/login'
     | '/profil'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/discussion'
+    | '/messages'
     | '/films'
     | '/login'
     | '/profil'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscussionRoute: typeof DiscussionRoute
+  MessagesRoute: typeof MessagesRoute
   FilmsRoute: typeof FilmsRouteWithChildren
   LoginRoute: typeof LoginRoute
   ProfilRoute: typeof ProfilRoute
@@ -170,6 +183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscussionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -207,6 +227,7 @@ const FilmsRouteWithChildren = FilmsRoute._addFileChildren(FilmsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscussionRoute: DiscussionRoute,
+  MessagesRoute: MessagesRoute,
   FilmsRoute: FilmsRouteWithChildren,
   LoginRoute: LoginRoute,
   ProfilRoute: ProfilRoute,
