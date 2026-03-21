@@ -3,21 +3,23 @@ import { create } from 'zustand';
 const getApiBase = () =>
   import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
 
-interface User {
+export interface AuthUser {
     id: string;
     username: string;
     email: string;
-    avatar?: string;
+    avatarUrl?: string | null;
+    bio?: string | null;
+    coverUrl?: string | null;
 }
 
 interface AuthState {
-    user: User | null;
+    user: AuthUser | null;
     token: string | null;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
-    setUser: (user: User | null) => void;
+    setUser: (user: AuthUser | null) => void;
     setToken: (token: string | null) => void;
 }
 
@@ -38,7 +40,11 @@ export const useAuthStore = create<AuthState>((set) => {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error ?? 'Échec de connexion');
-            const user = { id: data.user.id, username: data.user.username, email: data.user.email };
+            const user: AuthUser = {
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email,
+            };
             set({ user, token: data.token, isAuthenticated: true });
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(user));
@@ -52,7 +58,11 @@ export const useAuthStore = create<AuthState>((set) => {
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error ?? 'Échec d\'inscription');
-            const user = { id: data.user.id, username: data.user.username, email: data.user.email };
+            const user: AuthUser = {
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email,
+            };
             set({ user, token: data.token, isAuthenticated: true });
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(user));
@@ -64,7 +74,7 @@ export const useAuthStore = create<AuthState>((set) => {
             localStorage.removeItem('user');
         },
 
-        setUser: (user: User | null) => {
+        setUser: (user: AuthUser | null) => {
             set({ user, isAuthenticated: !!user });
             if (user) {
                 localStorage.setItem('user', JSON.stringify(user));

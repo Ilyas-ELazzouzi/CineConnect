@@ -1,8 +1,10 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { HomeIcon, FilmsIcon, CommunityIcon, MessagesIcon, ProfileIcon, SearchIcon } from './icons';
+import { useAuthStore } from '../hooks';
 
 export const Header = () => {
   const location = useLocation();
+  const { isAuthenticated, logout } = useAuthStore();
 
   const navItems = [
     { to: '/', label: 'Accueil', icon: HomeIcon },
@@ -47,9 +49,31 @@ export const Header = () => {
             })}
           </div>
 
-          <button className="p-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all duration-300">
-            <SearchIcon className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="hidden sm:inline-flex px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800/50 transition-colors"
+              >
+                Déconnexion
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center rounded-lg bg-[#9747FF] px-4 py-2 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"
+              >
+                Connexion
+              </Link>
+            )}
+            <button
+              type="button"
+              className="p-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all duration-300"
+              aria-label="Recherche"
+            >
+              <SearchIcon className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </nav>
     </header>
