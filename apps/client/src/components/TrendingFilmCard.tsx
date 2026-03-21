@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { cleanPosterUrl } from '../lib/imageUtils';
+import { getHighResPosterUrl } from '../lib/imageUtils';
 import type { Film } from '../lib/api';
 
 interface TrendingFilmCardProps {
@@ -14,8 +14,8 @@ export const TrendingFilmCard: React.FC<TrendingFilmCardProps> = ({ film, index 
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const cleaned = cleanPosterUrl(film.poster);
-    setPosterUrl(cleaned);
+    const url = getHighResPosterUrl(film.poster);
+    setPosterUrl(url);
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, index * 100);

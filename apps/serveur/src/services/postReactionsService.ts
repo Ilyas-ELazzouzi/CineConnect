@@ -47,11 +47,11 @@ export async function setPostReaction(db: Db, postId: string, userId: string, va
   const [likeCount] = await db
     .select({ count: sql<string | number>`count(*)` })
     .from(postReactions)
-    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, 1))));
+    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, 1)));
   const [dislikeCount] = await db
     .select({ count: sql<string | number>`count(*)` })
     .from(postReactions)
-    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, -1))));
+    .where(and(eq(postReactions.postId, postId), eq(postReactions.value, -1)));
   const [userReaction] = await db
     .select({ value: postReactions.value })
     .from(postReactions)

@@ -1,6 +1,6 @@
 import { StarIcon, CalendarIcon } from "./icons";
 import type { Film } from "../lib/api";
-import { cleanPosterUrl } from "../lib/imageUtils";
+import { getHighResPosterUrl } from "../lib/imageUtils";
 import { useState, useEffect } from "react";
 import { ButtonLink } from "./ButtonLink";
 
@@ -15,8 +15,8 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
 
   useEffect(() => {
     if (film?.poster) {
-      const cleaned = cleanPosterUrl(film.poster);
-      setBackgroundImage(cleaned);
+      const url = getHighResPosterUrl(film.poster);
+      setBackgroundImage(url);
       setImageError(false);
     }
   }, [film]);
@@ -37,7 +37,10 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
             <img
               src={backgroundImage}
               alt={film.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               onError={() => setImageError(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
@@ -48,7 +51,7 @@ export const Hero: React.FC<HeroProps> = ({ film, isLoading = false }) => {
         )}
       </div>
 
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 h-full flex items-center pt-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-2xl space-y-6 animate-fade-in">
             <h1 className="text-6xl md:text-7xl lg:text-8xl font-display font-black text-white leading-tight">
