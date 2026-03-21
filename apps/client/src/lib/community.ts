@@ -33,14 +33,21 @@ export interface TrendingTopic {
   postCount: number;
 }
 
+export type CommunityFeedSort = 'all' | 'trending' | 'hot';
+
 export async function fetchCommunityPosts(
   limit: number = 50,
   token?: string | null,
+  sort: CommunityFeedSort = 'all',
 ): Promise<CommunityPost[]> {
   const base = getApiBase();
   const headers: Record<string, string> = {};
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${base}/api/community/posts?limit=${limit}`, { headers });
+  const params = new URLSearchParams({
+    limit: String(limit),
+    sort,
+  });
+  const res = await fetch(`${base}/api/community/posts?${params.toString()}`, { headers });
   const data = (await res.json()) as { posts?: CommunityPost[]; error?: string };
   if (!res.ok) {
     throw new Error(data.error ?? 'Erreur lors du chargement des posts');
