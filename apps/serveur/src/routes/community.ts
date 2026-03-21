@@ -9,6 +9,7 @@ import {
   getPostByIdService,
   incrementViewCountService,
   getTrendingTopicsService,
+  type CommunityFeedSort,
 } from '../services/communityPostsService.js';
 import { listCommentsService, createCommentService } from '../services/communityCommentsService.js';
 import { toggleLikeService } from '../services/communityLikesService.js';
@@ -35,6 +36,9 @@ export function registerCommunityRoutes(
   router.get('/api/community/posts', async (req, res, next) => {
     try {
       const limit = Math.min(Number(req.query.limit) || 50, 100);
+      const sortRaw = typeof req.query.sort === 'string' ? req.query.sort : undefined;
+      const sort: CommunityFeedSort =
+        sortRaw === 'trending' || sortRaw === 'hot' ? sortRaw : 'all';
       let currentUserId: string | undefined;
       const auth = req.header('authorization');
       if (auth?.toLowerCase().startsWith('bearer ')) {
@@ -45,7 +49,7 @@ export function registerCommunityRoutes(
           // token invalid, list without user reaction
         }
       }
-      const result = await listPostsService(opts.db, limit, currentUserId);
+      const result = await listPostsService(opts.db, limit, currentUserId, sort);
       res.status(200).json({ posts: result });
     } catch (e) {
       next(e);
