@@ -3,6 +3,7 @@ import type { Env } from '../config/env.js';
 import type { Db } from '../db/client.js';
 import { verifyAccessToken } from '../auth/jwt.js';
 import { messages } from '../db/schema/messages.js';
+import { canAccessDmRoom } from '../services/dmRoom.js';
 
 export function attachSocketServer(httpServer: import('node:http').Server, opts: { env: Env; db: Db }) {
   const io = new Server(httpServer, {
@@ -27,7 +28,12 @@ export function attachSocketServer(httpServer: import('node:http').Server, opts:
   io.on('connection', (socket) => {
     socket.on('room:join', (roomId: string) => {
       if (typeof roomId !== 'string' || roomId.length < 1) return;
-      socket.join(roomId);
+      const user = socket.data.user as { id: string; username: string; email: string };
+      if (!canAccessDmRoom(user.id, roomId.trim())) {
+        socket.emit('room:error', { error: 'Accès refusé à ce salon' });
+        return;
+      }
+      socket.join(roomId.trim());
     });
 
     socket.on('message:send', async (payload: { roomId: string; content: string }) => {
@@ -37,6 +43,10 @@ export function attachSocketServer(httpServer: import('node:http').Server, opts:
       if (!roomId || !content) return;
 
       const user = socket.data.user as { id: string; username: string; email: string };
+      if (!canAccessDmRoom(user.id, roomId)) {
+        socket.emit('message:error', { error: 'Accès refusé à ce salon' });
+        return;
+      }
       try {
         const inserted = await opts.db
           .insert(messages)

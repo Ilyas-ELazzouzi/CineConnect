@@ -15,6 +15,7 @@ import { registerFilmCommentRoutes } from './routes/filmComments.js';
 import { registerFilmRatingRoutes } from './routes/filmRatings.js';
 import { registerMeRoutes } from './routes/me.js';
 import { registerUserPublicRoutes } from './routes/users.js';
+import { registerMessagesApiRoutes } from './routes/messagesApi.js';
 import { buildOpenApiSpec } from './openapi/apiCart.js';
 import { errorHandler } from './middlewares/error.js';
 
@@ -55,6 +56,7 @@ export function createApp(opts: { env: Env; db?: Db }) {
     registerFilmRatingRoutes(router, { db, jwtSecret: env.JWT_SECRET });
     registerMeRoutes(router, { db, jwtSecret: env.JWT_SECRET });
     registerUserPublicRoutes(router, { db, jwtSecret: env.JWT_SECRET });
+    registerMessagesApiRoutes(router, { db, jwtSecret: env.JWT_SECRET });
   }
   app.use(router);
 
