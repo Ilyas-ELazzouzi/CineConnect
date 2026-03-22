@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { HomeIcon, FilmsIcon, CommunityIcon, MessagesIcon, ProfileIcon, SearchIcon } from './icons';
 import { useAuthStore } from '../hooks';
+import TargetCursor from './TargetCursor';
 
 export const Header = () => {
+  const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const { isAuthenticated, logout } = useAuthStore();
 
@@ -15,10 +18,24 @@ export const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-900">
+    <header
+      ref={headerRef}
+      className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-gray-900"
+    >
+      <TargetCursor
+        containerRef={headerRef}
+        targetSelector=".header-cursor-target"
+        spinDuration={2}
+        hideDefaultCursor
+        parallaxOn
+        hoverDuration={0.2}
+      />
       <nav className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2 group">
+          <Link
+            to="/"
+            className="header-cursor-target flex items-center space-x-2 group"
+          >
             <span className="text-2xl font-display font-bold text-white group-hover:text-[#9747FF] transition-colors duration-300">
               CINHETIC
             </span>
@@ -35,7 +52,7 @@ export const Header = () => {
                   key={item.to}
                   to={item.to}
                   className={`
-                    flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
+                    header-cursor-target flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300
                     ${isActive
                       ? 'bg-[#9747FF]/20 text-[#9747FF]'
                       : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
@@ -54,21 +71,21 @@ export const Header = () => {
               <button
                 type="button"
                 onClick={() => logout()}
-                className="hidden sm:inline-flex px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800/50 transition-colors"
+                className="header-cursor-target hidden sm:inline-flex px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800/50 transition-colors"
               >
                 Déconnexion
               </button>
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center rounded-lg bg-[#9747FF] px-4 py-2 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"
+                className="header-cursor-target inline-flex items-center rounded-lg bg-[#9747FF] px-4 py-2 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"
               >
                 Connexion
               </Link>
             )}
             <button
               type="button"
-              className="p-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all duration-300"
+              className="header-cursor-target p-2 text-gray-300 hover:text-white hover:bg-gray-800/50 rounded-lg transition-all duration-300"
               aria-label="Recherche"
             >
               <SearchIcon className="w-6 h-6" />
