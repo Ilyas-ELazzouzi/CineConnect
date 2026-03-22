@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   type CommunityPost,
   type TrendingTopic,
@@ -171,12 +172,42 @@ export const DiscussionView = () => {
                   className="bg-gray-900 rounded-2xl px-6 py-4 flex flex-col gap-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-700" />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-white">
-                        {post.author?.username ?? "Utilisateur"}
-                      </span>
-                    </div>
+                    {post.author?.id ? (
+                      <Link
+                        to="/user/$userId"
+                        params={{ userId: post.author.id }}
+                        className="flex items-center gap-3 min-w-0 group"
+                      >
+                        {post.author.avatarUrl ? (
+                          <img
+                            src={post.author.avatarUrl}
+                            alt=""
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-transparent group-hover:ring-[#9747FF]/50 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white font-semibold shrink-0 group-hover:ring-2 group-hover:ring-[#9747FF]/50">
+                            {(post.author.username ?? "?").slice(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex flex-col min-w-0 text-left">
+                          <span className="text-sm font-semibold text-white truncate group-hover:text-[#9747FF] transition-colors">
+                            {post.author.username ?? "Utilisateur"}
+                          </span>
+                          <span className="text-[11px] text-gray-500">
+                            Voir le profil
+                          </span>
+                        </div>
+                      </Link>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-full bg-gray-700 shrink-0" />
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-semibold text-white truncate">
+                            {post.author?.username ?? "Utilisateur"}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="mt-1 space-y-1">
                     <h2 className="text-base font-semibold text-white">

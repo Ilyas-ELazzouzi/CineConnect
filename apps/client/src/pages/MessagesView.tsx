@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { Route } from "../routes/messages";
+import { dmRoomIdForPair, fetchPublicProfile } from "../lib/userPublic";
+import { useAuthStore } from "../hooks";
 
 type Conversation = {
   id: string;
@@ -54,12 +58,34 @@ const MOCK_THREAD: Record<string, ChatMessage[]> = {
 };
 
 export const MessagesView = () => {
+  const { with: withUserId } = Route.useSearch();
+  const { user, token } = useAuthStore();
+  const [peerName, setPeerName] = useState<string | null>(null);
+
   const [conversations] = useState(MOCK_CONVERSATIONS);
   const [activeId, setActiveId] = useState("1");
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_THREAD["1"] ?? []);
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!withUserId) {
+      setPeerName(null);
+      return;
+    }
+    let cancelled = false;
+    void fetchPublicProfile(withUserId, token)
+      .then((r) => {
+        if (!cancelled) setPeerName(r.profile.username);
+      })
+      .catch(() => {
+        if (!cancelled) setPeerName(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [withUserId, token]);
 
   const active = conversations.find((c) => c.id === activeId) ?? conversations[0];
 
@@ -91,6 +117,33 @@ export const MessagesView = () => {
 
   return (
     <div className="min-h-screen bg-black pt-16 flex flex-col text-white">
+      {withUserId && (
+        <div className="border-b border-[#9747FF]/25 bg-[#9747FF]/10 px-4 py-3 text-sm text-gray-200 flex flex-wrap items-center justify-between gap-3 max-w-[1600px] mx-auto w-full">
+          <div className="flex flex-col gap-0.5">
+            <span>
+              {peerName ? (
+                <>
+                  Conversation avec <strong className="text-white">{peerName}</strong>
+                </>
+              ) : (
+                <span className="text-gray-400">Chargement du contact…</span>
+              )}
+            </span>
+            {user && withUserId && (
+              <span className="text-[11px] text-gray-500 font-mono">
+                Salon : {dmRoomIdForPair(user.id, withUserId)}
+              </span>
+            )}
+          </div>
+          <Link
+            to="/user/$userId"
+            params={{ userId: withUserId }}
+            className="text-[#9747FF] hover:underline text-sm shrink-0"
+          >
+            Voir le profil
+          </Link>
+        </div>
+      )}
       <div className="flex flex-1 min-h-[calc(100vh-4rem)] max-w-[1600px] mx-auto w-full">
         <aside className="w-full max-w-[360px] shrink-0 border-r border-gray-800/80 bg-[#0d0d0f] flex flex-col">
           <div className="p-4 border-b border-gray-800/80">
