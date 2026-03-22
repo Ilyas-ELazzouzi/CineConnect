@@ -7,7 +7,7 @@ import TargetCursor from './TargetCursor';
 export const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const navItems = [
     { to: '/', label: 'Accueil', icon: HomeIcon },
@@ -67,15 +67,7 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {isAuthenticated ? (
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="header-cursor-target hidden sm:inline-flex px-3 py-2 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800/50 transition-colors"
-              >
-                Déconnexion
-              </button>
-            ) : (
+            {!isAuthenticated && (
               <Link
                 to="/login"
                 className="header-cursor-target inline-flex items-center rounded-lg bg-[#9747FF] px-4 py-2 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"

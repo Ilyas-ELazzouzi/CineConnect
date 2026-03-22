@@ -24,7 +24,7 @@ function formatDate(iso: string) {
 }
 
 export const ProfilView = () => {
-  const { token, isAuthenticated, setUser } = useAuthStore();
+  const { token, isAuthenticated, setUser, logout } = useAuthStore();
 
   const [profile, setProfile] = useState<MeProfile | null>(null);
   const [posts, setPosts] = useState<MePost[]>([]);
@@ -39,6 +39,7 @@ export const ProfilView = () => {
   const [editCoverUrl, setEditCoverUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   const loadAll = useCallback(async () => {
     if (!token) return;
@@ -204,13 +205,22 @@ export const ProfilView = () => {
                 <p className="mt-3 text-gray-500 text-sm italic">Aucune bio pour le moment.</p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={openEdit}
-              className="self-start sm:self-end shrink-0 rounded-xl border border-gray-700 bg-gray-900/80 px-5 py-2.5 text-sm font-medium text-white hover:border-[#9747FF]/50 hover:bg-gray-800 transition-colors"
-            >
-              Modifier le profil
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 self-start sm:self-end shrink-0 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={openEdit}
+                className="rounded-xl border border-gray-700 bg-gray-900/80 px-5 py-2.5 text-sm font-medium text-white hover:border-[#9747FF]/50 hover:bg-gray-800 transition-colors"
+              >
+                Modifier le profil
+              </button>
+              <button
+                type="button"
+                onClick={() => setLogoutConfirmOpen(true)}
+                className="rounded-xl border border-red-900/60 bg-red-950/30 px-5 py-2.5 text-sm font-medium text-red-300 hover:bg-red-950/50 hover:border-red-800 transition-colors"
+              >
+                Déconnexion
+              </button>
+            </div>
           </div>
 
           <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -373,6 +383,45 @@ export const ProfilView = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {logoutConfirmOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div
+            className="absolute inset-0"
+            role="presentation"
+            onClick={() => setLogoutConfirmOpen(false)}
+          />
+          <div
+            className="relative z-10 w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-950 p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-white mb-2">Déconnexion</h3>
+            <p className="text-sm text-gray-400 mb-6">
+              Voulez-vous vraiment vous déconnecter ? Vous devrez vous reconnecter pour accéder à votre
+              compte.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setLogoutConfirmOpen(false)}
+                className="rounded-lg px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800/80"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLogoutConfirmOpen(false);
+                  logout();
+                }}
+                className="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-500"
+              >
+                Se déconnecter
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
