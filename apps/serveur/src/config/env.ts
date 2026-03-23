@@ -39,6 +39,8 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL requis'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET trop court (>= 16)'),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  REFRESH_TOKEN_SECRET: z.string().min(16, 'REFRESH_TOKEN_SECRET trop court (>= 16)').optional(),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default('30d'),
   OMDB_API_KEY: z.string().optional(),
   CORS_ORIGINS: z
     .string()

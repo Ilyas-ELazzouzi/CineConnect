@@ -6,8 +6,7 @@ import {
   fetchFilmComments,
   createFilmComment,
   setFilmCommentReaction,
-  type FilmComment,
-} from '../lib/filmComments';
+  type FilmComment,} from '../lib/filmComments';
 import { fetchFilmRating, setFilmRating, type FilmRatingInfo } from '../lib/filmRatings';
 
 interface FilmDetailViewProps {

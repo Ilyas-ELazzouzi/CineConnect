@@ -1,4 +1,5 @@
 export { Header } from './Header';
+export { Footer } from './Footer';
 export { Hero } from './Hero';
 export { FilmCard } from './FilmCard';
 export { TrendingFilmCard } from './TrendingFilmCard';

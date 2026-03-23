@@ -50,7 +50,14 @@ export function createApp(opts: { env: Env; db?: Db }) {
   registerHealthRoutes(router);
   registerOmdbRoutes(router, { omdbApiKey: env.OMDB_API_KEY });
   if (db) {
-    registerAuthRoutes(router, { db, jwtSecret: env.JWT_SECRET, jwtExpiresIn: env.JWT_EXPIRES_IN });
+    registerAuthRoutes(router, {
+      db,
+      jwtSecret: env.JWT_SECRET,
+      jwtExpiresIn: env.JWT_EXPIRES_IN,
+      refreshTokenSecret: env.REFRESH_TOKEN_SECRET ?? env.JWT_SECRET,
+      refreshTokenExpiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
+      secureCookies: env.NODE_ENV === 'production',
+    });
     registerCommunityRoutes(router, { db, jwtSecret: env.JWT_SECRET });
     registerFilmCommentRoutes(router, { db, jwtSecret: env.JWT_SECRET });
     registerFilmRatingRoutes(router, { db, jwtSecret: env.JWT_SECRET });

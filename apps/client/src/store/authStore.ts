@@ -18,7 +18,8 @@ interface AuthState {
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (username: string, email: string, password: string) => Promise<void>;
-    logout: () => void;
+    refreshSession: () => Promise<boolean>;
+    logout: () => Promise<void>;
     setUser: (user: AuthUser | null) => void;
     setToken: (token: string | null) => void;
 }
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => {
             const res = await fetch(`${getApiBase()}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ email, password }),
             });
             const data = await res.json();
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>((set) => {
             const res = await fetch(`${getApiBase()}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ username, email, password }),
             });
             const data = await res.json();
@@ -68,7 +71,34 @@ export const useAuthStore = create<AuthState>((set) => {
             localStorage.setItem('user', JSON.stringify(user));
         },
 
-        logout: () => {
+        refreshSession: async () => {
+            const res = await fetch(`${getApiBase()}/api/auth/refresh`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                set({ user: null, token: null, isAuthenticated: false });
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                return false;
+            }
+            const user: AuthUser = {
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email,
+            };
+            set({ user, token: data.token, isAuthenticated: true });
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(user));
+            return true;
+        },
+
+        logout: async () => {
+            await fetch(`${getApiBase()}/api/auth/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            }).catch(() => undefined);
             set({ user: null, token: null, isAuthenticated: false });
             localStorage.removeItem('token');
             localStorage.removeItem('user');
