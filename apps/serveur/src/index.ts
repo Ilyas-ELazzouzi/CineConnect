@@ -25,13 +25,10 @@ process.on('SIGINT', async () => {
 });
 
 if (process.env.NO_LISTEN === '1') {
-  // eslint-disable-next-line no-console
   console.log('NO_LISTEN=1: serveur initialisé sans écoute réseau.');
 } else {
   server.listen(env.PORT, () => {
-    // eslint-disable-next-line no-console
     console.log(`Serveur CineConnect: http://localhost:${env.PORT}`);
-    // eslint-disable-next-line no-console
     console.log(`Swagger: http://localhost:${env.PORT}/docs`);
   });
 }

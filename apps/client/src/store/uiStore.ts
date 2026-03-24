@@ -26,6 +26,6 @@ export const useUIStore = create<UIState>((set) => ({
   toggleMenu: () => set((state) => ({ isMenuOpen: !state.isMenuOpen })),
   openMenu: () => set({ isMenuOpen: true }),
   closeMenu: () => set({ isMenuOpen: false }),
-  setTheme: (theme: 'light' | 'dark') => set({ theme }),
-  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setTheme:(theme: 'light' | 'dark') => set({ theme: theme }),
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen})),
 }));
