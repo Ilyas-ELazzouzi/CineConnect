@@ -1,5 +1,5 @@
 import { pgTable, timestamp, uuid, text, unique } from 'drizzle-orm/pg-core';
-import { users } from './users';
+import { users } from './users.js';
 
 export const FRIEND_STATUSES = ['pending', 'accepted', 'rejected'] as const;
 

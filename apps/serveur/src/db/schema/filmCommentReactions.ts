@@ -1,6 +1,6 @@
 import { pgTable, smallint, timestamp, uuid, unique } from 'drizzle-orm/pg-core';
-import { users } from './users';
-import { filmComments } from './filmComments';
+import { users } from './users.js';
+import { filmComments } from './filmComments.js';
 
 export const filmCommentReactions = pgTable(
   'film_comment_reactions',

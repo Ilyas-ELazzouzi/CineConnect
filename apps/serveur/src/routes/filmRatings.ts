@@ -16,6 +16,7 @@ export function registerFilmRatingRoutes(
   router.get('/api/films/:imdbId/rating', async (req, res, next) => {
     try {
       const { imdbId } = req.params;
+      if (!imdbId) return res.status(400).json({ error: 'imdbId requis' });
       let userId: string | undefined;
       const auth = req.header('authorization');
       if (auth?.toLowerCase().startsWith('bearer ')) {
@@ -39,6 +40,7 @@ export function registerFilmRatingRoutes(
     async (req, res, next) => {
       try {
         const { imdbId } = req.params;
+        if (!imdbId) return res.status(400).json({ error: 'imdbId requis' });
         const body = SetRatingSchema.parse(req.body);
         const user = (req as AuthedRequest).user;
         const result = await setFilmRating(opts.db, imdbId, user.id, body.rating);

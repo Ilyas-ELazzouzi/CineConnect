@@ -1,6 +1,6 @@
 import { pgTable, smallint, timestamp, uuid, unique } from 'drizzle-orm/pg-core';
-import { users } from './users';
-import { communityPosts } from './communityPosts';
+import { users } from './users.js';
+import { communityPosts } from './communityPosts.js';
 
 export const postReactions = pgTable(
   'post_reactions',

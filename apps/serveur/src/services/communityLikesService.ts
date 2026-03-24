@@ -13,14 +13,14 @@ export async function toggleLikeService(db: Db, postId: string, userId: string) 
     return { status: 404, body: { error: 'Post non trouvé' } } as const;
   }
 
-  const existing = await db
+  const [existingLike] = await db
     .select({ id: postLikes.id })
     .from(postLikes)
     .where(and(eq(postLikes.postId, postId), eq(postLikes.userId, userId)))
     .limit(1);
 
-  if (existing.length > 0) {
-    await db.delete(postLikes).where(eq(postLikes.id, existing[0].id));
+  if (existingLike) {
+    await db.delete(postLikes).where(eq(postLikes.id, existingLike.id));
     const [likeCount] = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(postLikes)

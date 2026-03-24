@@ -17,6 +17,9 @@ export async function searchOmdbService(req: Request, env: OmdbEnv) {
 
 export async function getMovieDetailsOmdbService(req: Request, env: OmdbEnv) {
   const imdbId = req.params.imdbId;
+  if (!imdbId) {
+    return { status: 400, body: { error: 'imdbId requis' } };
+  }
   const url = buildRequestUrl(req);
   return proxyOmdb({
     env,

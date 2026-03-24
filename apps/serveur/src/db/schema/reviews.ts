@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, uuid, integer } from 'drizzle-orm/pg-core';
-import { users } from './users';
-import { films } from './films';
+import { users } from './users.js';
+import { films } from './films.js';
 
 export const reviews = pgTable('reviews', {
   id: uuid('id').primaryKey().defaultRandom(),
