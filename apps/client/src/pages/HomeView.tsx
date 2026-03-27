@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
 import { Film } from 'lucide-react';
-import Noise from '../components/Noise';
 import FilmShapeGrid from '../components/FilmShapeGrid';
 import TextCursor from '../components/TextCursor';
 import { TrendingSection } from '../components';
@@ -33,17 +32,6 @@ export const HomeView = () => {
 
   return (
     <div className="relative bg-black">
-      {/* Grain animé (fond) */}
-      <div className="fixed inset-0 z-[1] overflow-hidden pointer-events-none">
-        <Noise
-          patternSize={250}
-          patternScaleX={2}
-          patternScaleY={2}
-          patternRefreshInterval={2}
-          patternAlpha={15}
-        />
-      </div>
-
       <div className="absolute inset-0 z-[2]">
         <FilmShapeGrid
           posters={posters}
@@ -62,7 +50,7 @@ export const HomeView = () => {
         <section className="flex flex-1 flex-col items-center justify-center px-4 pt-20 pb-32 text-center">
           <div className="relative h-[220px] w-full max-w-6xl">
             <h1 className="whitespace-nowrap font-display text-[clamp(2rem,6vw,5rem)] font-black tracking-wide text-white">
-              WELCOME TO CINHETIC
+              WELCOME TO CIN'HETIC.
             </h1>
             <div className="absolute inset-0">
               <TextCursor
