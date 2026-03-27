@@ -1,82 +1,20 @@
 import express from 'express';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import fs from 'node:fs';
-import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
-import type { Env } from './config/env.js';
-import { parseCorsOrigins } from './config/cors.js';
-import type { Db } from './db/client.js';
-import { registerHealthRoutes } from './routes/health.js';
-import { registerOmdbRoutes } from './routes/omdb.js';
-import { registerAuthRoutes } from './routes/auth.js';
-import { registerCommunityRoutes } from './routes/community.js';
-import { registerFilmCommentRoutes } from './routes/filmComments.js';
-import { registerFilmRatingRoutes } from './routes/filmRatings.js';
-import { registerMeRoutes } from './routes/me.js';
-import { registerUserPublicRoutes } from './routes/users.js';
-import { registerMessagesApiRoutes } from './routes/messagesApi.js';
-import { buildOpenApiSpec } from './openapi/apiCart.js';
+import type { AppDependencies } from './app/types.js';
+import { setupCors } from './app/setupCors.js';
+import { registerApiRoutes } from './app/registerApiRoutes.js';
+import { setupApiDocs } from './app/setupApiDocs.js';
+import { setupClientApp } from './app/setupClientApp.js';
 import { errorHandler } from './middlewares/error.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const clientDistPath = path.resolve(__dirname, '../../client/dist');
-
-export function createApp(opts: { env: Env; db?: Db }) {
-  const { env, db } = opts;
-
+export function createApp(deps: AppDependencies) {
   const app = express();
   app.disable('x-powered-by');
 
-  const isAllowedOrigin = parseCorsOrigins(env.CORS_ORIGINS);
-  app.use(
-    cors({
-      origin(
-        origin: string | undefined,
-        callback: (err: Error | null, allow?: boolean) => void,
-      ) {
-        if (!origin) return callback(null, false);
-        return callback(null, isAllowedOrigin(origin));
-      },
-      credentials: true,
-      allowedHeaders: ['content-type', 'authorization', 'x-request-id'],
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    }),
-  );
-
+  setupCors(app, deps.env.CORS_ORIGINS);
   app.use(express.json({ limit: '1mb' }));
-
-  const router = express.Router();
-  registerHealthRoutes(router);
-  registerOmdbRoutes(router, { omdbApiKey: env.OMDB_API_KEY });
-  if (db) {
-    registerAuthRoutes(router, {
-      db,
-      jwtSecret: env.JWT_SECRET,
-      jwtExpiresIn: env.JWT_EXPIRES_IN,
-      refreshTokenSecret: env.REFRESH_TOKEN_SECRET ?? env.JWT_SECRET,
-      refreshTokenExpiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
-      secureCookies: env.NODE_ENV === 'production',
-    });
-    registerCommunityRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-    registerFilmCommentRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-    registerFilmRatingRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-    registerMeRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-    registerUserPublicRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-    registerMessagesApiRoutes(router, { db, jwtSecret: env.JWT_SECRET });
-  }
-  app.use(router);
-
-  const spec = buildOpenApiSpec(env);
-  app.get('/openapi.json', (_req, res) => res.json(spec));
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
-
-  if (fs.existsSync(clientDistPath)) {
-    app.use(express.static(clientDistPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(clientDistPath, 'index.html'));
-    });
-  }
+  registerApiRoutes(app, deps);
+  setupApiDocs(app, deps);
+  setupClientApp(app);
 
   app.use(errorHandler);
   return app;

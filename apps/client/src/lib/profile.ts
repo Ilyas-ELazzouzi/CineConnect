@@ -1,5 +1,4 @@
-const getApiBase = () =>
-  import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
+import { fetchWithAutoRefresh } from './authHttp';
 
 export interface MeProfileStats {
   postsCount: number;
@@ -35,14 +34,9 @@ export interface MeFilmComment {
   createdAt: string;
 }
 
-function authHeaders(token: string): HeadersInit {
-  return { Authorization: `Bearer ${token}` };
-}
-
 export async function fetchMeProfile(token: string): Promise<{ profile: MeProfile }> {
-  const base = getApiBase();
-  const res = await fetch(`${base}/api/me/profile`, {
-    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+  const res = await fetchWithAutoRefresh('/api/me/profile', token, {
+    headers: { 'Content-Type': 'application/json' },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? 'Impossible de charger le profil');
@@ -50,11 +44,8 @@ export async function fetchMeProfile(token: string): Promise<{ profile: MeProfil
 }
 
 export async function fetchMyPosts(token: string, limit = 50): Promise<{ posts: MePost[] }> {
-  const base = getApiBase();
   const params = new URLSearchParams({ limit: String(limit) });
-  const res = await fetch(`${base}/api/me/posts?${params}`, {
-    headers: authHeaders(token),
-  });
+  const res = await fetchWithAutoRefresh(`/api/me/posts?${params.toString()}`, token);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? 'Impossible de charger les publications');
   return data as { posts: MePost[] };
@@ -64,11 +55,8 @@ export async function fetchMyFilmComments(
   token: string,
   limit = 50,
 ): Promise<{ comments: MeFilmComment[] }> {
-  const base = getApiBase();
   const params = new URLSearchParams({ limit: String(limit) });
-  const res = await fetch(`${base}/api/me/film-comments?${params}`, {
-    headers: authHeaders(token),
-  });
+  const res = await fetchWithAutoRefresh(`/api/me/film-comments?${params.toString()}`, token);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? 'Impossible de charger les commentaires');
   return data as { comments: MeFilmComment[] };
@@ -85,10 +73,9 @@ export async function patchMeProfile(
   token: string,
   input: PatchMeProfileInput,
 ): Promise<{ profile: MeProfile }> {
-  const base = getApiBase();
-  const res = await fetch(`${base}/api/me/profile`, {
+  const res = await fetchWithAutoRefresh('/api/me/profile', token, {
     method: 'PATCH',
-    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
   const data = await res.json();
