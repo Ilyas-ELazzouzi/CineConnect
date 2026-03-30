@@ -45,9 +45,9 @@ export const Footer = () => {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="relative mt-2 overflow-hidden rounded-none bg-black">
           {/* Top grid titles + content (animated height) */}
-          <div className="relative z-10 px-14 pt-12 pb-10">
+          <div className="relative z-10 px-14 pt-12 pb-6">
             {/* Vertical separators (4 lines) — dynamic height (follows content) */}
-            <div className="pointer-events-none absolute left-14 right-14 top-12 bottom-10">
+            <div className="pointer-events-none absolute left-14 right-14 top-12 bottom-6">
               <div className="absolute left-0 top-0 h-full w-px bg-white/45" />
               <div className="absolute left-1/3 top-0 h-full w-px bg-white/35" />
               <div className="absolute left-2/3 top-0 h-full w-px bg-white/35" />
@@ -115,9 +115,9 @@ export const Footer = () => {
           </div>
 
           {/* Big background text */}
-          <div className="relative h-[280px]">
+          <div className="relative h-[230px]">
             {/* subtle top fade like mock */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black to-transparent" />
             <motion.div
               style={{
                 y: bigY,
@@ -126,7 +126,7 @@ export const Footer = () => {
               }}
               className="absolute inset-x-0 bottom-0"
             >
-              <div className="px-14 pb-10">
+              <div className="px-14 pb-4">
                 <div
                   className="select-none text-[clamp(5rem,16vw,12rem)] font-black tracking-[0.02em]"
                   style={{
