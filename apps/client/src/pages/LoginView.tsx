@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuthStore } from '../hooks';
+import { LoginSchema, RegisterSchema } from '../lib/validators/auth';
 
 export const LoginView = () => {
   const navigate = useNavigate();
@@ -20,10 +21,12 @@ export const LoginView = () => {
 
     try {
       if (isLogin) {
-        await login(email, password);
+        const parsed = LoginSchema.parse({ email, password });
+        await login(parsed.email, parsed.password);
       } else {
         const register = useAuthStore.getState().register;
-        await register(username, email, password);
+        const parsed = RegisterSchema.parse({ username, email, password });
+        await register(parsed.username, parsed.email, parsed.password);
       }
       navigate({ to: '/' });
     } catch (err: any) {

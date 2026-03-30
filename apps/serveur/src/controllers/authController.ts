@@ -10,13 +10,13 @@ import {
 } from '../services/authService.js';
 
 const RegisterSchema = z.object({
-  username: z.string().min(3).max(30),
-  email: z.string().email(),
+  username: z.string().trim().min(3).max(30),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6).max(200),
 });
 
 const LoginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1).max(200),
 });
 

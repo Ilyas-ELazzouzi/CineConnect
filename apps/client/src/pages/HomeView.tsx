@@ -35,11 +35,11 @@ export const HomeView = () => {
       <div className="absolute inset-0 z-[2]">
         <FilmShapeGrid
           posters={posters}
-          speed={0.35}
+          speed={0.15}
           direction="diagonal"
           borderColor="#271E37"
           hoverColor="#222222"
-          size={200}
+          size={300}
           gap={6}
           shape="square"
         />
