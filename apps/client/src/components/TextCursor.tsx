@@ -29,11 +29,12 @@ export default function TextCursor({
   randomFloat = true,
   exitDuration = 0.5,
   removalInterval = 30,
-  maxPoints = 5,
+  maxPoints = 4,
 }: TextCursorProps) {
   const [trail, setTrail] = useState<TrailItem[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const lastMoveTimeRef = useRef(Date.now());
+  const lastHandledMoveRef = useRef(0);
   const idCounter = useRef(0);
 
   useEffect(() => {
@@ -50,6 +51,11 @@ export default function TextCursor({
         : {};
 
     const handleMouseMove = (e: MouseEvent) => {
+      const now = performance.now();
+      // Throttle mouse handling to ~60fps max (et encore moins si CPU chargé)
+      if (now - lastHandledMoveRef.current < 16) return;
+      lastHandledMoveRef.current = now;
+
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
