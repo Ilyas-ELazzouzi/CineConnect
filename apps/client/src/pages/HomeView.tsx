@@ -31,7 +31,7 @@ export const HomeView = () => {
   const line = MARQUEE_ITEMS.map((t) => ` · ${t}`).join('');
 
   return (
-    <div className="relative bg-black">
+    <div className="relative mb-12 bg-black md:mb-16">
       <div className="absolute inset-0 z-[2]">
         <FilmShapeGrid
           posters={posters}

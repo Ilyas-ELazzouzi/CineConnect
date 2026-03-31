@@ -154,21 +154,21 @@ async function mapWithConcurrency<T, R>(
   concurrency: number,
   mapper: (item: T) => Promise<R | null>,
 ): Promise<R[]> {
-  const out: R[] = [];
-  if (items.length === 0) return out;
+  if (items.length === 0) return [];
 
   let idx = 0;
+  const out = new Array<R | null>(items.length).fill(null);
   const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
     while (idx < items.length) {
       const current = idx;
       idx += 1;
       const value = await mapper(items[current] as T);
-      if (value !== null) out.push(value);
+      out[current] = value;
     }
   });
 
   await Promise.all(workers);
-  return out;
+  return out.filter((value): value is R => value !== null);
 }
 
 export const categoriesAPI = {
