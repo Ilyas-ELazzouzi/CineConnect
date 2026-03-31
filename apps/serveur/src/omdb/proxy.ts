@@ -1,4 +1,33 @@
 const OMDB_BASE_URL = 'https://www.omdbapi.com/';
+const OMDB_CACHE_TTL_MS = 1000 * 60 * 10; // 10 minutes
+
+type CacheEntry = {
+  expiresAt: number;
+  status: number;
+  body: unknown;
+};
+
+const omdbCache = new Map<string, CacheEntry>();
+
+function getCacheKey(path: string, url: URL) {
+  return `${path}?${url.searchParams.toString()}`;
+}
+
+function readCache(key: string): { status: number; body: unknown } | null {
+  const hit = omdbCache.get(key);
+  if (!hit) return null;
+  if (Date.now() > hit.expiresAt) {
+    omdbCache.delete(key);
+    return null;
+  }
+  return { status: hit.status, body: hit.body };
+}
+
+function writeCache(key: string, status: number, body: unknown) {
+  // cache only successful upstream responses
+  if (status < 200 || status >= 300) return;
+  omdbCache.set(key, { status, body, expiresAt: Date.now() + OMDB_CACHE_TTL_MS });
+}
 
 type OmdbEnv = {
   omdbApiKey: string | undefined;
@@ -21,6 +50,10 @@ export async function proxyOmdb({
   if (!env.omdbApiKey) {
     return { status: 500, body: { error: 'OMDB_API_KEY manquant côté serveur.' } };
   }
+
+  const cacheKey = getCacheKey(path, url);
+  const cached = readCache(cacheKey);
+  if (cached) return cached;
 
   const upstream = new URL(OMDB_BASE_URL);
   upstream.searchParams.set('apikey', env.omdbApiKey);
@@ -45,6 +78,7 @@ export async function proxyOmdb({
   const raw = await response.text();
   try {
     const parsed = JSON.parse(raw) as unknown;
+    writeCache(cacheKey, response.status, parsed);
     return { status: response.status, body: parsed };
   } catch {
     return { status: 502, body: { error: 'Réponse OMDb non-JSON.', raw: raw.slice(0, 200) } };
