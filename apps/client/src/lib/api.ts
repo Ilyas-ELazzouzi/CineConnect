@@ -142,7 +142,7 @@ export const filmsAPI = {
 async function fetchAndTransformMovie(imdbID: string): Promise<Film | null> {
   try {
     const details = await omdbService.getMovieById(imdbID);
-    return transformOMDbMovie(details) as Film;
+    return transformOMDbMovie(details);
   } catch (error) {
     console.error(`Erreur pour ${imdbID}:`, error);
     return null;

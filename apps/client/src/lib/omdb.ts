@@ -45,6 +45,22 @@ export interface OMDbSearchResult {
   Error?: string;
 }
 
+export interface TransformedMovie {
+  id: string;
+  imdbId: string;
+  title: string;
+  year?: number;
+  director?: string;
+  plot?: string;
+  poster?: string;
+  rating: number;
+  categories: string[];
+  actors?: string;
+  runtime?: string;
+  genre?: string;
+  imdbRating?: string;
+}
+
 export function convertImdbRatingTo5(imdbRating: string): number {
   const rating = parseFloat(imdbRating);
   if (isNaN(rating)) return 0;
@@ -112,8 +128,8 @@ export const omdbService = {
   },
 };
 
-export function transformOMDbMovie(omdbMovie: OMDbMovie): any {
-  const year = omdbMovie.Year ? parseInt(omdbMovie.Year.split('–')[0]) : null;
+export function transformOMDbMovie(omdbMovie: OMDbMovie): TransformedMovie {
+  const year = omdbMovie.Year ? parseInt(omdbMovie.Year.split('–')[0]) : undefined;
   const rating = omdbMovie.imdbRating
     ? convertImdbRatingTo5(omdbMovie.imdbRating)
     : 0;
@@ -125,7 +141,7 @@ export function transformOMDbMovie(omdbMovie: OMDbMovie): any {
     year: year,
     director: omdbMovie.Director || undefined,
     plot: omdbMovie.Plot || undefined,
-    poster: omdbMovie.Poster !== 'N/A' ? omdbMovie.Poster : null,
+    poster: omdbMovie.Poster !== 'N/A' ? omdbMovie.Poster : undefined,
     rating: rating,
     categories: mapGenresToCategories(omdbMovie.Genre),
     actors: omdbMovie.Actors,
