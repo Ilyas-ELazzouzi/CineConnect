@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from '@tanstack/react-router';
 import { useAuthStore } from '../hooks';
 import { LoginSchema, RegisterSchema } from '../lib/validators/auth';
+import { ZodError } from 'zod';
 
 export const LoginView = () => {
   const navigate = useNavigate();
@@ -30,7 +31,12 @@ export const LoginView = () => {
       }
       navigate({ to: '/' }); 
     } catch (err: any) {
-      setError(err.message || 'L\'authentification sera disponible en Phase 2');
+      if (err instanceof ZodError) {
+        const first = err.errors[0];
+        setError(first?.message ?? 'Veuillez vérifier les informations saisies.');
+      } else {
+        setError(err.message || 'L\'authentification sera disponible en Phase 2');
+      }
     } finally {
       setLoading(false);
     }
