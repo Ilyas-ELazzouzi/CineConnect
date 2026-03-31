@@ -1,3 +1,5 @@
+import { fetchWithAutoRefresh } from './authHttp';
+
 const getApiBase = () =>
   import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
 
@@ -11,10 +13,10 @@ export async function fetchFilmRating(
   imdbId: string,
   token?: string | null,
 ): Promise<FilmRatingInfo> {
-  const base = getApiBase();
-  const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${base}/api/films/${encodeURIComponent(imdbId)}/rating`, { headers });
+  const path = `/api/films/${encodeURIComponent(imdbId)}/rating`;
+  const res = token
+    ? await fetchWithAutoRefresh(path, token)
+    : await fetch(`${getApiBase()}${path}`);
   const data = (await res.json()) as FilmRatingInfo & { error?: string };
   if (!res.ok) {
     throw new Error(data.error ?? 'Erreur lors du chargement de la note');
@@ -31,12 +33,13 @@ export async function setFilmRating(
   rating: number,
   token: string,
 ): Promise<FilmRatingInfo> {
-  const base = getApiBase();
-  const res = await fetch(`${base}/api/films/${encodeURIComponent(imdbId)}/rating`, {
+  const res = await fetchWithAutoRefresh(
+    `/api/films/${encodeURIComponent(imdbId)}/rating`,
+    token,
+    {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ rating }),
   });
