@@ -28,7 +28,7 @@ export const LoginView = () => {
         const parsed = RegisterSchema.parse({ username, email, password });
         await register(parsed.username, parsed.email, parsed.password);
       }
-      navigate({ to: '/' });
+      navigate({ to: '/' }); 
     } catch (err: any) {
       setError(err.message || 'L\'authentification sera disponible en Phase 2');
     } finally {

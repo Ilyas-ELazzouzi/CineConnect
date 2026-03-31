@@ -45,16 +45,11 @@ export const filmsAPI = {
     if (result.Response === 'False' || !result.Search) {
       return { films: [], totalResults: 0 };
     }
-    const films: Film[] = [];
-    for (const movie of result.Search) {
-      try {
-        const details = await omdbService.getMovieById(movie.imdbID);
-        const transformed = transformOMDbMovie(details);
-        films.push(transformed);
-      } catch (error) {
-        console.error(`Erreur lors de la récupération de ${movie.imdbID}:`, error);
-      }
-    }
+    const films = await mapWithConcurrency(
+      result.Search,
+      6,
+      async (movie) => fetchAndTransformMovie(movie.imdbID),
+    );
     return {
       films,
       totalResults: result.totalResults ? parseInt(result.totalResults) : undefined,
@@ -68,31 +63,29 @@ export const filmsAPI = {
 
   getPopular: async (limit: number = 20): Promise<Film[]> => {
     const searchTerms = ['action', 'drama', 'comedy', 'thriller', 'adventure'];
-    const allFilms: Film[] = [];
+    const candidateIds: string[] = [];
     const seenIds = new Set<string>();
 
     for (const term of searchTerms) {
-      if (allFilms.length >= limit) break;
       try {
         const result = await omdbService.searchMovies(term, 1);
-        if (result.Search) {
-          for (const movie of result.Search.slice(0, 5)) {
-            if (seenIds.has(movie.imdbID) || allFilms.length >= limit) continue;
-            try {
-              const details = await omdbService.getMovieById(movie.imdbID);
-              const transformed = transformOMDbMovie(details);
-              allFilms.push(transformed);
-              seenIds.add(movie.imdbID);
-            } catch (error) {
-              console.error(`Erreur pour ${movie.imdbID}:`, error);
-            }
-          }
+        if (!result.Search) continue;
+        for (const movie of result.Search.slice(0, 8)) {
+          if (seenIds.has(movie.imdbID)) continue;
+          seenIds.add(movie.imdbID);
+          candidateIds.push(movie.imdbID);
         }
       } catch (error) {
         console.error(`Erreur lors de la recherche "${term}":`, error);
       }
     }
-    return allFilms;
+
+    const films = await mapWithConcurrency(
+      candidateIds,
+      6,
+      async (imdbID) => fetchAndTransformMovie(imdbID),
+    );
+    return films.slice(0, limit);
   },
 
   getByCategory: async (category: string, limit: number = 20): Promise<Film[]> => {
@@ -123,19 +116,12 @@ export const filmsAPI = {
     if (result.Response === 'False' || !result.Search) {
       return [];
     }
-    const films: Film[] = [];
-    for (const movie of result.Search.slice(0, limit)) {
-      try {
-        const details = await omdbService.getMovieById(movie.imdbID);
-        const transformed = transformOMDbMovie(details);
-        if (transformed.categories?.includes(category.toLowerCase())) {
-          films.push(transformed);
-        }
-      } catch (error) {
-        console.error(`Erreur pour ${movie.imdbID}:`, error);
-      }
-    }
-    return films;
+    const films = await mapWithConcurrency(
+      result.Search.slice(0, Math.max(limit * 2, 20)),
+      6,
+      async (movie) => fetchAndTransformMovie(movie.imdbID),
+    );
+    return films.filter((f) => f.categories?.includes(category.toLowerCase())).slice(0, limit);
   },
 
   getAll: async (params?: { search?: string; category?: string; limit?: number }): Promise<{ films: Film[] }> => {
@@ -152,6 +138,38 @@ export const filmsAPI = {
     return { films };
   },
 };
+
+async function fetchAndTransformMovie(imdbID: string): Promise<Film | null> {
+  try {
+    const details = await omdbService.getMovieById(imdbID);
+    return transformOMDbMovie(details) as Film;
+  } catch (error) {
+    console.error(`Erreur pour ${imdbID}:`, error);
+    return null;
+  }
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T) => Promise<R | null>,
+): Promise<R[]> {
+  const out: R[] = [];
+  if (items.length === 0) return out;
+
+  let idx = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (idx < items.length) {
+      const current = idx;
+      idx += 1;
+      const value = await mapper(items[current] as T);
+      if (value !== null) out.push(value);
+    }
+  });
+
+  await Promise.all(workers);
+  return out;
+}
 
 export const categoriesAPI = {
   getAll: async (): Promise<{ categories: Array<{ id: string; name: string }> }> => {
