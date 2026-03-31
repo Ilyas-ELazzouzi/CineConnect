@@ -1,0 +1,26 @@
+{
+    "name": "cineconnect-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "pnpm --filter @cineconnect/client dev",
+        "dev:client": "pnpm --filter @cineconnect/client dev",
+        "dev:server": "pnpm --filter @cineconnect/serveur dev",
+        "build": "pnpm --filter @cineconnect/client build",
+        "build:client": "pnpm --filter @cineconnect/client build",
+        "build:server": "pnpm --filter @cineconnect/serveur build",
+        "start": "pnpm build:client && pnpm dev:server",
+        "lint": "pnpm --filter @cineconnect/client lint",
+        "clean": "pnpm -r exec rm -rf node_modules dist .next",
+        "install:all": "pnpm install"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.3"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "pnpm": ">=8.0.0"
+    },
+    "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
+}

@@ -1,0 +1,10 @@
+export { HomeView } from './HomeView';
+export { FilmsView } from './FilmsView';
+export { FilmsByCategoryView } from './FilmsByCategoryView';
+export { FilmDetailView } from './FilmDetailView';
+export { LoginView } from './LoginView';
+export { RegisterView } from './RegisterView';
+export { ProfilView } from './ProfilView';
+export { UserPublicProfileView } from './UserPublicProfileView';
+export { DiscussionView } from './DiscussionView';
+export { MessagesView } from './MessagesView';

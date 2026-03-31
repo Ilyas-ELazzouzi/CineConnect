@@ -1,0 +1,13 @@
+export { users } from './users.js';
+export { films } from './films.js';
+export { categories } from './categories.js';
+export { reviews } from './reviews.js';
+export { messages } from './messages.js';
+export { friends } from './friends.js';
+export { communityPosts } from './communityPosts.js';
+export { postComments } from './postComments.js';
+export { postLikes } from './postLikes.js';
+export { postReactions } from './postReactions.js';
+export { filmComments } from './filmComments.js';
+export { filmCommentReactions } from './filmCommentReactions.js';
+export { filmRatings } from './filmRatings.js';
