@@ -1,3 +1,5 @@
+import { fetchWithAutoRefresh } from './authHttp';
+
 const getApiBase = () =>
   import.meta.env.DEV ? (import.meta.env.VITE_API_URL ?? 'http://localhost:3001') : '';
 
@@ -40,14 +42,14 @@ export async function fetchCommunityPosts(
   token?: string | null,
   sort: CommunityFeedSort = 'all',
 ): Promise<CommunityPost[]> {
-  const base = getApiBase();
-  const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
   const params = new URLSearchParams({
     limit: String(limit),
     sort,
   });
-  const res = await fetch(`${base}/api/community/posts?${params.toString()}`, { headers });
+  const path = `/api/community/posts?${params.toString()}`;
+  const res = token
+    ? await fetchWithAutoRefresh(path, token)
+    : await fetch(`${getApiBase()}${path}`);
   const data = (await res.json()) as { posts?: CommunityPost[]; error?: string };
   if (!res.ok) {
     throw new Error(data.error ?? 'Erreur lors du chargement des posts');
@@ -60,12 +62,13 @@ export async function setPostReaction(
   value: 1 | -1,
   token: string,
 ): Promise<PostReactionResult> {
-  const base = getApiBase();
-  const res = await fetch(`${base}/api/community/posts/${encodeURIComponent(postId)}/reaction`, {
+  const res = await fetchWithAutoRefresh(
+    `/api/community/posts/${encodeURIComponent(postId)}/reaction`,
+    token,
+    {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ value }),
   });
@@ -99,12 +102,10 @@ export async function createCommunityPost(
   input: { content: string; filmTitle?: string; imageUrl?: string },
   token: string,
 ): Promise<CommunityPost> {
-  const base = getApiBase();
-  const res = await fetch(`${base}/api/community/posts`, {
+  const res = await fetchWithAutoRefresh('/api/community/posts', token, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(input),
   });

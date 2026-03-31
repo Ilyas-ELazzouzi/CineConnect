@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '../components';
 import { useAuthStore } from '../hooks';
+import { RegisterSchema } from '../lib/validators/auth';
 
 export const RegisterView = () => {
   const navigate = useNavigate();
@@ -18,7 +19,8 @@ export const RegisterView = () => {
     setLoading(true);
 
     try {
-      await register(username, email, password);
+      const parsed = RegisterSchema.parse({ username, email, password });
+      await register(parsed.username, parsed.email, parsed.password);
       navigate({ to: '/' });
     } catch (err: any) {
       setError(err.message || 'L\'inscription sera disponible en Phase 2');

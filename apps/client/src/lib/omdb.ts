@@ -122,7 +122,12 @@ export const omdbService = {
     const base = getApiBase();
     const url = `${base}/api/omdb/search?s=${encodeURIComponent(query)}&page=${page}`;
     const res = await fetch(url);
-    const data = (await res.json()) as OMDbSearchResult & { error?: string };
+    let data: OMDbSearchResult & { error?: string };
+    try {
+      data = (await res.json()) as OMDbSearchResult & { error?: string };
+    } catch {
+      throw new Error('Réponse OMDb invalide');
+    }
     if (!res.ok) throw new Error(data.error ?? 'Erreur OMDb');
     return data;
   },
@@ -130,7 +135,12 @@ export const omdbService = {
   getMovieById: async (imdbId: string): Promise<OMDbMovie> => {
     const base = getApiBase();
     const res = await fetch(`${base}/api/omdb/movie/${encodeURIComponent(imdbId)}`);
-    const data = (await res.json()) as OMDbMovie & { error?: string };
+    let data: OMDbMovie & { error?: string };
+    try {
+      data = (await res.json()) as OMDbMovie & { error?: string };
+    } catch {
+      throw new Error('Réponse OMDb invalide');
+    }
     if (!res.ok) throw new Error(data.error ?? 'Film non trouvé');
     if (data.Response === 'False') throw new Error((data as { Error?: string }).Error ?? 'Film non trouvé');
     return data;

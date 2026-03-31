@@ -9,7 +9,7 @@ export const TrendingSection = () => {
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
-    fetchPopularFilms(10);
+    fetchPopularFilms(20);
   }, []);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export const TrendingSection = () => {
               msOverflowStyle: 'none',
             }}
           >
-            {films.slice(0, 10).map((film, index) => (
+            {films.slice(0, 20).map((film, index) => (
               <TrendingFilmCard
                 key={film.id}
                 film={film}
