@@ -45,6 +45,35 @@ export interface OMDbSearchResult {
   Error?: string;
 }
 
+export interface TransformedMovie {
+  id: string;
+  imdbId: string;
+  title: string;
+  year?: number;
+  director?: string;
+  plot?: string;
+  poster?: string;
+  rating: number;
+  categories: string[];
+  actors?: string;
+  runtime?: string;
+  genre?: string;
+  imdbRating?: string;
+}
+
+function cleanOptionalText(value?: string): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed && trimmed !== 'N/A' ? trimmed : undefined;
+}
+
+function parseMovieYear(rawYear?: string): number | undefined {
+  if (!rawYear) return undefined;
+  const firstYear = rawYear.trim().split(/[-–]/)[0];
+  const parsed = Number.parseInt(firstYear, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
+
 export function convertImdbRatingTo5(imdbRating: string): number {
   const rating = parseFloat(imdbRating);
   if (isNaN(rating)) return 0;
@@ -112,8 +141,8 @@ export const omdbService = {
   },
 };
 
-export function transformOMDbMovie(omdbMovie: OMDbMovie): any {
-  const year = omdbMovie.Year ? parseInt(omdbMovie.Year.split('–')[0]) : null;
+export function transformOMDbMovie(omdbMovie: OMDbMovie): TransformedMovie {
+  const year = parseMovieYear(omdbMovie.Year);
   const rating = omdbMovie.imdbRating
     ? convertImdbRatingTo5(omdbMovie.imdbRating)
     : 0;
@@ -123,14 +152,14 @@ export function transformOMDbMovie(omdbMovie: OMDbMovie): any {
     imdbId: omdbMovie.imdbID,
     title: omdbMovie.Title,
     year: year,
-    director: omdbMovie.Director || undefined,
-    plot: omdbMovie.Plot || undefined,
-    poster: omdbMovie.Poster !== 'N/A' ? omdbMovie.Poster : null,
+    director: cleanOptionalText(omdbMovie.Director),
+    plot: cleanOptionalText(omdbMovie.Plot),
+    poster: cleanOptionalText(omdbMovie.Poster),
     rating: rating,
     categories: mapGenresToCategories(omdbMovie.Genre),
-    actors: omdbMovie.Actors,
-    runtime: omdbMovie.Runtime,
-    genre: omdbMovie.Genre,
-    imdbRating: omdbMovie.imdbRating,
+    actors: cleanOptionalText(omdbMovie.Actors),
+    runtime: cleanOptionalText(omdbMovie.Runtime),
+    genre: cleanOptionalText(omdbMovie.Genre),
+    imdbRating: cleanOptionalText(omdbMovie.imdbRating),
   };
 }
