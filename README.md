@@ -1,46 +1,110 @@
-# CineConnect - Lancement avec Docker
+# CineConnect
 
-Ce projet peut etre lance avec un seul `docker compose up` (serveur + client + PostgreSQL).
+Monorepo CineConnect avec:
+- `apps/client` (React + Vite)
+- `apps/serveur` (Node.js + Express + Drizzle)
+- PostgreSQL (local ou Docker)
 
 ## Prerequis
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installe
+- Node.js `>= 18`
+- `pnpm` `>= 8`
+- Docker Desktop (optionnel, pour le demarrage via containers)
 
-## Demarrage rapide
+---
 
-1. Clone le repo
-2. A la racine du projet, lance:
+## Lancer le projet en local (recommande pour le dev)
+
+### 1) Installer les dependances
+
+Depuis la racine:
+
+```bash
+pnpm install
+```
+
+### 2) Demarrer PostgreSQL
+
+Option simple avec Docker (BDD uniquement):
+
+```bash
+docker compose up -d db
+```
+
+### 3) Configurer les variables d'environnement du serveur
+
+Dans `apps/serveur`, creer un fichier `.env` (ou partir de `.env.example` si present) avec au minimum:
+
+```env
+PORT=3001
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cineconnect
+JWT_SECRET=change-me
+REFRESH_TOKEN_SECRET=change-me-too
+OMDB_API_KEY=your_omdb_key
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+```
+
+### 4) Appliquer les migrations BDD
+
+```bash
+pnpm --filter @cineconnect/serveur db:migrate
+```
+
+### 5) Lancer le serveur et le client
+
+Dans deux terminaux differents:
+
+```bash
+pnpm dev:server
+```
+
+```bash
+pnpm dev:client
+```
+
+### 6) URLs utiles
+
+- Frontend: `http://localhost:5173`
+- API backend: `http://localhost:3001`
+- Swagger: `http://localhost:3001/docs`
+
+---
+
+## Lancer tout avec Docker
+
+Depuis la racine:
 
 ```bash
 docker compose up --build
 ```
 
-3. Ouvre l'application:
-   - App: `http://localhost:3001`
-   - Swagger: `http://localhost:3001/docs`
+Services exposes:
+- App/API: `http://localhost:3001`
+- Swagger: `http://localhost:3001/docs`
+- PostgreSQL: `localhost:5432`
 
-Le client est servi par le serveur Express en mode production.
+Le `docker-compose.yml` fournit des valeurs par defaut pour la plupart des variables.
 
-## Variables d'environnement
+---
 
-Le `docker-compose.yml` fournit des valeurs par defaut.  
-Pour personnaliser les secrets et la cle OMDb, cree un fichier `.env` a la racine du repo (non versionne), par exemple:
+## Scripts utiles (racine)
 
-```env
-JWT_SECRET=your-super-secret-key
-REFRESH_TOKEN_SECRET=your-super-refresh-secret
-OMDB_API_KEY=your-omdb-key
-```
+- `pnpm dev` : lance le client
+- `pnpm dev:client` : lance le client (Vite)
+- `pnpm dev:server` : lance le serveur (tsx watch)
+- `pnpm build` : build client
+- `pnpm build:server` : build serveur
+- `pnpm lint` : lint client
 
-Un exemple dedie Docker est disponible ici: `apps/serveur/.env.docker.example`.
+---
 
-## Arret
+## Arret des containers
 
 ```bash
 docker compose down
 ```
 
-Pour supprimer aussi les donnees PostgreSQL:
+Pour supprimer aussi les volumes PostgreSQL:
 
 ```bash
 docker compose down -v
