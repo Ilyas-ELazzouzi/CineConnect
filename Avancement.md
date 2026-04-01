@@ -6,6 +6,9 @@ Document de suivi à jour des réalisations du projet, de façon synthétique.
 
 ## Vue d’ensemble
 
+
+
+
 **CineConnect** est un monorepo (pnpm) contenant une application web de type « cinéma / films » : un **client** React (Vite) et un **serveur** Node (Express) qui s’appuie sur une base PostgreSQL et l’API OMDb pour les données films.
 
 ---
